@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'firebaseAuth.dart';
 import 'create.dart';
+import '../home.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -75,15 +76,3 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 }
 
-// Dummy HomePage for navigation after login
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Home')),
-      body: const Center(child: Text('Welcome! You are logged in.')),
-    );
-  }
-}
