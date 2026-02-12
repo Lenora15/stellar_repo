@@ -14,7 +14,7 @@ class _HomePageState extends State<HomePage> {
   static const TextStyle optionStyle =
       TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
   
-  //list for navbar options
+  //display selected option in the center of the page
   static const List<Widget> _widgetOptions = <Widget>[
     Text(
       'Home',
@@ -49,33 +49,37 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
+      backgroundColor: Color(0xFF303154),
       body: Center(child: _widgetOptions.elementAt(_selectedInedex)),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
+            backgroundColor: Color.fromARGB(255, 28, 29, 49),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_month),
             label: 'Calendar',
+            backgroundColor: Color.fromARGB(255, 28, 29, 49),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
+            backgroundColor: Color.fromARGB(255, 28, 29, 49),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.note),
             label: 'Notes',
+            backgroundColor: Color.fromARGB(255, 28, 29, 49),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
+            backgroundColor: Color.fromARGB(255, 28, 29, 49),
           ),
         ],
         currentIndex: _selectedInedex,
-        selectedItemColor: Colors.deepPurple,
         onTap: _onItemTapped,
       ),
     );
