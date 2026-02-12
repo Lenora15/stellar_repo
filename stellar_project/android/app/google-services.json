@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "166807333582",
+    "project_id": "stellarbackend",
+    "storage_bucket": "stellarbackend.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:166807333582:android:b93681edd47a12091f7e9f",
+        "android_client_info": {
+          "package_name": "com.example.stellar_project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "166807333582-f4ataq9uj3d1rn62n86s0c6fcl18lqhe.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAg4ysgof8G91IPmLx5H6VbONtHtNfhs9s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "166807333582-f4ataq9uj3d1rn62n86s0c6fcl18lqhe.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
