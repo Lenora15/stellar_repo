@@ -17,11 +17,15 @@ class _NotesPageState extends State<NotesPage> {
   Widget build(BuildContext context) {
   return Scaffold(
       backgroundColor: (Colors.transparent),
+
+      //implement list of notes, the titles will be called from the database
       body: ListView.builder(
           itemBuilder: (context, index) {
             return ListTile(
               title: Text('Note ${index + 1}'),
               onTap: () {
+                //when user taps note, brings user to edit page. 
+                
                 // Handle note tap, e.g., navigate to note details
               },
             );

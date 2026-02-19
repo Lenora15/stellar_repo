@@ -31,7 +31,11 @@ class _CreateAccountState extends State<CreateAccount> {
               width: MediaQuery.of(context).size.width / 2,
               child: TextField(
                 controller: _emailController,
-                decoration: const InputDecoration(hintText: 'Email'),
+                decoration: const InputDecoration(
+                  hintText: 'Email',
+                  filled: true,
+                  fillColor: Colors.white70, 
+                  ),
               ),
             ),
             const SizedBox(height: 20),
@@ -40,7 +44,11 @@ class _CreateAccountState extends State<CreateAccount> {
               child: TextField(
                 controller: _passwordController,
                 obscureText: true,
-                decoration: const InputDecoration(hintText: 'Password'),
+                decoration: const InputDecoration(
+                  hintText: 'Password',
+                  filled: true,
+                  fillColor: Colors.white70, 
+                  ),
               ),
             ),
             const SizedBox(height: 30),

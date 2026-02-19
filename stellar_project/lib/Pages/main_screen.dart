@@ -16,9 +16,6 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold, color: Colors.white);
-  
   static const List<Widget> _widgetOptions = <Widget>[
     HomeContent(),
     CalendarPage(),

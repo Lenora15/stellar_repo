@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 //this is where notes.dart will take you when you go to create a new note. 
 // this will also be what interacts with the database to create a new note and save it.
@@ -19,7 +20,10 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
 
-      //
+      //body will be modified later to be better looking. just for testing purposes 
+      //note: plan is to have the note creator be a pop up instead of a whole new page. will modify later.
+      //add ability to color code notes upon creation.
+      //modifications will need to be possible to edit after creation as well. possibly in different file
       body: Padding(
         padding: const EdgeInsets.only(
           top: 50.0,
@@ -46,13 +50,15 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
                 String content = _contentController.text;
 
                 // Save the note to Firestore
-                await FirebaseFirestore.instance.collection('notes').add({
+                //add some sort of error handling a litte later. this is just for texting purposes.
+
+                final db = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)' );
+                await db.collection('notes').add({
                   'title': title,
                   'content': content,
                   'timestamp': FieldValue.serverTimestamp(),
                 });
-
-                // Navigate back to the notes page after saving
+                // back to page after saving
                 Navigator.pop(context);
               },
               child: const Text('Save Note'),

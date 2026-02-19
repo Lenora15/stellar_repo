@@ -15,45 +15,27 @@ class HomeContent extends StatelessWidget{
       children: [
         Container(
           height: 100,
-          color: Colors.blue,
-          child: const Center(child: Text('Widget 1')),
+          color: Colors.white.withValues(alpha:0.3),
+          child: const Center(child: Text('some text')),
         ),
         const SizedBox(height: 10),
         Container(
           height: 100,
-          color: Colors.green,
-          child: const Center(child: Text('Widget 2')),
+          color: Colors.white.withValues(alpha:0.3),
+          child: const Center(child: Text('some text')),
         ),
        const SizedBox(height: 10),
         Container(
           height: 100,
-          color: Colors.orange,
-          child: const Center(child: Text('Widget 3')),
+          color: Colors.white.withValues(alpha:0.3),
+          child: const Center(child: Text('some text')),
         ),
        const SizedBox(height: 10),
         Container(
           height: 100,
-          color: Colors.purple,
-          child: const Center(child: Text('Widget 4')),
+          color: Colors.white.withValues(alpha:0.3),
+          child: const Center(child: Text('some text')),
         ),
-       const SizedBox(height: 10),
-        Container(
-          height: 100,
-          color: Colors.red,
-          child: const Center(child: Text('Widget 5')),
-        ),
-       const SizedBox(height: 10),
-       Container(
-         height: 100,
-         color: Colors.yellow,
-         child: const Center(child: Text('Widget 6')),
-       ),
-       const SizedBox(height: 10),
-       Container(
-         height: 100,
-         color: Colors.cyan,
-         child: const Center(child: Text('Widget 7')),
-       ),
       ]
     );
   }
