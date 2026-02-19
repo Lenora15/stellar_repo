@@ -1,5 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
+//relies on the firebase_auth package, which is added to pubspec.yaml
+//be sure to run flutter pub add firebase_auth before using this code
 class AuthService {
   Future<String?> registration({
     required String email,

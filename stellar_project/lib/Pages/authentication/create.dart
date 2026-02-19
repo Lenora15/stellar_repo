@@ -2,6 +2,12 @@ import 'package:flutter/material.dart';
 import 'firebaseAuth.dart';
 import 'login.dart';
 
+
+//user needs to have a name and other metadata associated with their account. 
+// this is the start of being able to reset passwords and that such.
+
+
+
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
 

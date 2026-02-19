@@ -9,6 +9,8 @@ class AppThemeData {
 }
 
 // Themes. pulling images from another file as the main background image
+//themes will also include text at the top of the screen with a greeting and date. 
+
 class AppThemes{
   static final morning = AppThemeData(
     theme: ThemeData(
