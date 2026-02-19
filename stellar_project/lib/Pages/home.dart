@@ -1,88 +1,60 @@
+//home page
+
 import 'package:flutter/material.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomeContent extends StatelessWidget{
+  const HomeContent({super.key});
 
-  @override
-  State<HomePage> createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  int _selectedInedex = 0;
-  
-  //establishing text style for the options in the bottom navigation bar
-  static const TextStyle optionStyle =
-      TextStyle(fontSize: 30, fontWeight: FontWeight.bold);
-  
-  //display selected option in the center of the page
-  static const List<Widget> _widgetOptions = <Widget>[
-    Text(
-      'Home',
-      style: optionStyle,
-    ),
-    Text(
-      'Calendar',
-      style: optionStyle,
-    ),
-    Text(
-      'Chat',
-      style: optionStyle,
-    ),
-    Text(
-      'Notes',
-      style: optionStyle,
-    ),
-    Text(
-      'Profile',
-      style: optionStyle,
-    ),
-  ];
-
-  //setting selected index to item tapped in navbar
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedInedex = index;
-    });
-  }
-  
-  //actually building the page including the navbar
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF303154),
-      body: Center(child: _widgetOptions.elementAt(_selectedInedex)),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-            backgroundColor: Color.fromARGB(255, 28, 29, 49),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Calendar',
-            backgroundColor: Color.fromARGB(255, 28, 29, 49),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chat',
-            backgroundColor: Color.fromARGB(255, 28, 29, 49),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.note),
-            label: 'Notes',
-            backgroundColor: Color.fromARGB(255, 28, 29, 49),
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-            backgroundColor: Color.fromARGB(255, 28, 29, 49),
-          ),
-        ],
-        currentIndex: _selectedInedex,
-        onTap: _onItemTapped,
-      ),
+    // need to use listview for widgets on the homepage. 
+    // widgets will be linked to other pages, and show basic content from other pages
+
+    //sample for testing purposes
+    return ListView(
+      children: [
+        Container(
+          height: 100,
+          color: Colors.blue,
+          child: const Center(child: Text('Widget 1')),
+        ),
+        const SizedBox(height: 10),
+        Container(
+          height: 100,
+          color: Colors.green,
+          child: const Center(child: Text('Widget 2')),
+        ),
+       const SizedBox(height: 10),
+        Container(
+          height: 100,
+          color: Colors.orange,
+          child: const Center(child: Text('Widget 3')),
+        ),
+       const SizedBox(height: 10),
+        Container(
+          height: 100,
+          color: Colors.purple,
+          child: const Center(child: Text('Widget 4')),
+        ),
+       const SizedBox(height: 10),
+        Container(
+          height: 100,
+          color: Colors.red,
+          child: const Center(child: Text('Widget 5')),
+        ),
+       const SizedBox(height: 10),
+       Container(
+         height: 100,
+         color: Colors.yellow,
+         child: const Center(child: Text('Widget 6')),
+       ),
+       const SizedBox(height: 10),
+       Container(
+         height: 100,
+         color: Colors.cyan,
+         child: const Center(child: Text('Widget 7')),
+       ),
+      ]
     );
   }
-} 
-
+}
