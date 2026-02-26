@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'Pages/authentication/login.dart';
 import 'themes/app_themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 
 
 
@@ -16,9 +17,44 @@ void main() async {
   );
   runApp(const MyApp());
 }
-
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  Timer? _themeTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+      _refreshApp();
+    });
+  }
+    void _refreshApp() async {
+      if (mounted){
+        setState(() {});
+      }
+    
+    try { 
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null){
+        await user.getIdToken(true);
+      }
+    } catch (e) {
+      debugPrint("Security Error: User session has expired, please log in again.");
+    }
+  }
+
+
+@override
+void dispose() {
+  _themeTimer?.cancel();
+  super.dispose();
+}
 
   @override
   Widget build(BuildContext context) {
