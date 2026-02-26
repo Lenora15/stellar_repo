@@ -54,6 +54,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
               ),
+
+              //reset password button
+              TextButton(
+                onPressed: () async {
+                  if (_emailController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter your email.')),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await _authService.resetPassword(email: _emailController.text);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password reset email sent. Please check your inbox.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  };
+                },
+                child: const Text(
+                  'Forgot Password?',
+                  style: TextStyle(color: Colors.black), 
+                ),
+              ),
+
               const SizedBox(height: 30),
               ElevatedButton(
                 style: ElevatedButton.styleFrom(
@@ -80,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 },
                 child: const Text('Login'),
               ),
+
               const SizedBox(height: 20),
               TextButton(
                 onPressed: () {
@@ -94,6 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
             ],
+
           ),
         ),
       ),
