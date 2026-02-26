@@ -29,6 +29,13 @@
             {
               "client_id": "166807333582-f4ataq9uj3d1rn62n86s0c6fcl18lqhe.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "166807333582-1ofdlusbm5os1ojs3ip8l7ohmhn41qhr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.stellarProject"
+              }
             }
           ]
         }
