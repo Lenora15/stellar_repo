@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:stellar_project/Pages/home.dart';
 import 'package:stellar_project/Pages/main_screen.dart';
 import 'firebase_options.dart';
 import 'Pages/authentication/login.dart';
