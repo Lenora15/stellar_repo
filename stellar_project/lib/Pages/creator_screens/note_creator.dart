@@ -16,56 +16,104 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
 
+
+  Future<void> _saveNote() async {
+    String title = _titleController.text;
+    String content = _contentController.text;
+  
+    //give note the name "untitled" if not given a name by the user
+    if(title.isEmpty) {
+      title = "Untitled";
+    }
+
+    //communication with the database
+    final db = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)' );
+    
+    //make sure the note saves successfully
+    try{
+          await db.collection('notes').add({
+      'title': title,
+      'content': content,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    if (mounted){
+      Navigator.pop(context);
+    }
+
+    } catch (e) {
+      print("Error saving note: $e");
+
+      //display error to the user
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save note: ${e.toString()}'),
+            action: SnackBarAction(
+              label: 'Retry',
+
+              //attempt to save note again
+              onPressed: _saveNote, 
+            ),
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
-      //body will be modified later to be better looking. just for testing purposes 
-      //note: plan is to have the note creator be a pop up instead of a whole new page. will modify later.
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context)
+        ),
+        actions: [
+          TextButton(
+            onPressed: _saveNote,
+            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,))
+          )
+        ]
+      ),
       //add ability to color code notes upon creation.
       //modifications will need to be possible to edit after creation as well. possibly in different file
-      body: Padding(
-        padding: const EdgeInsets.only(
-          top: 50.0,
-          left: 16.0,
-          right: 16.0,
-        ),
+      body: Column(
+        children:[
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 10),
 
-        child: Column(
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Title'),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _contentController,
-              decoration: const InputDecoration(labelText: 'Content'),
-              maxLines: 5,
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () async {
-                String title = _titleController.text;
-                String content = _contentController.text;
+                  //Title
+                  TextField(
+                    controller: _titleController,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                    decoration: const InputDecoration(
+                      hintText: 'Title',
+                      border: InputBorder.none,
+                    )
+                  ),
 
-                // Save the note to Firestore
-                //add some sort of error handling a litte later. this is just for texting purposes.
-
-                final db = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)' );
-                await db.collection('notes').add({
-                  'title': title,
-                  'content': content,
-                  'timestamp': FieldValue.serverTimestamp(),
-                });
-                // back to page after saving
-                Navigator.pop(context);
-              },
-              child: const Text('Save Note'),
-            ),
-          ],
-        ),
-      ),
+                  //content
+                  TextField(
+                    controller: _contentController,
+                    style: const TextStyle(fontSize: 18),
+                    decoration: const InputDecoration(
+                      hintText: 'Write your note here...',
+                      hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                      border: InputBorder.none,
+                    ),
+                  )
+                ]
+              )
+            )
+          )
+        ],
+      )
     );
   }
 }
