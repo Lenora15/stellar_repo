@@ -1,0 +1,176 @@
+This document contains pices of code I deleted from my project but dont want to lose
+
+note_creator.dart:
+
+/*body: Padding(
+        padding: const EdgeInsets.only(
+          top: 50.0,
+          left: 16.0,
+          right: 16.0,
+        ),
+
+        child: Column(
+          children: [
+            TextField(
+              controller: _titleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _contentController,
+              decoration: const InputDecoration(labelText: 'Content'),
+              maxLines: 5,
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () async {
+                String title = _titleController.text;
+                String content = _contentController.text;
+
+                // Save the note to Firestore
+                //add some sort of error handling a litte later. this is just for texting purposes.
+
+                final db = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)' );
+                await db.collection('notes').add({
+                  'title': title,
+                  'content': content,
+                  'timestamp': FieldValue.serverTimestamp(),
+                });
+                // back to page after saving
+                Navigator.pop(context);
+              },
+              child: const Text('Save Note'),
+            ),
+          ],
+        ),
+      ),*/
+
+login.dart:
+
+import 'dart:ui';
+import 'package:flutter/material.dart';
+import 'firebaseAuth.dart';
+import 'create.dart';
+import '../main_screen.dart';
+
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  // Use "identifier" because it can be an email OR a username
+  final TextEditingController _identifierController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.transparent, 
+      appBar: AppBar(
+        title: const Text('Login'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(height: 100),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 1.5, 
+                child: TextField(
+                  controller: _identifierController,
+                  decoration: const InputDecoration(
+                    hintText: 'Username or Email',
+                    filled: true,
+                    fillColor: Colors.white70, 
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              //title
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 1.5,
+                child: TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: const InputDecoration(
+                    hintText: 'Password',
+                    filled: true,
+                    fillColor: Colors.white70,
+                  ),
+                ),
+              ),
+
+              TextButton(
+                onPressed: () async {
+                  if (_identifierController.text.isEmpty || !_identifierController.text.contains('@')) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please enter a valid email to reset your password.')),
+                    );
+                    return;
+                  }
+
+                  try {
+                    await _authService.resetPassword(email: _identifierController.text.trim());
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Password reset email sent.')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Error: ${e.toString()}')),
+                    );
+                  }
+                },
+                child: const Text('Forgot Password?', style: TextStyle(color: Colors.black)),
+              ),
+
+              const SizedBox(height: 30),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(minimumSize: const Size(150, 50)),
+                onPressed: () async {
+                  // Calls the hybrid login method
+                  String? result = await _authService.hybridLogin(
+                    identifier: _identifierController.text.trim(),
+                    password: _passwordController.text,
+                  );
+                  
+                  if (!mounted) return; 
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(result ?? 'Error')),
+                  );
+
+                  if (result == 'Success') {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (context) => const MainScreen()),
+                    );
+                  }
+                },
+                child: const Text('Login'),
+              ),
+
+              const SizedBox(height: 20),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreateAccount()),
+                  );
+                },
+                child: const Text('Create Account', style: TextStyle(color: Colors.black)),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

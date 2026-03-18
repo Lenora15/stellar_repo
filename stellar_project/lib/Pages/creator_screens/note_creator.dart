@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 //this is where notes.dart will take you when you go to create a new note. 
 // this will also be what interacts with the database to create a new note and save it.
@@ -31,7 +32,8 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
     
     //make sure the note saves successfully
     try{
-          await db.collection('notes').add({
+      await db.collection('notes').add({
+      'userID': FirebaseAuth.instance.currentUser?.uid,
       'title': title,
       'content': content,
       'timestamp': FieldValue.serverTimestamp(),
