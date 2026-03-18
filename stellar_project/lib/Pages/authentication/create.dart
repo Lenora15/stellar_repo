@@ -33,23 +33,18 @@ class _CreateAccountState extends State<CreateAccount> {
     }
   }
 
-  // Helper updated for Black Text & Symbols
   Widget _buildTextField(TextEditingController controller, String hint, IconData icon, {bool obscure = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: TextField(
         controller: controller,
         obscureText: obscure,
-        // Sets the typed text to black
         style: const TextStyle(color: Colors.black), 
         decoration: InputDecoration(
-          // Sets the icon to black/dark grey
           prefixIcon: Icon(icon, color: Colors.black54),
           hintText: hint,
-          // Sets the hint/placeholder text to black/dark grey
           hintStyle: const TextStyle(color: Colors.black45),
           filled: true,
-          // Lightened fill to ensure black text is readable
           fillColor: Colors.white.withValues(alpha: 0.6),
           contentPadding: const EdgeInsets.symmetric(vertical: 15),
           border: OutlineInputBorder(
@@ -101,7 +96,7 @@ class _CreateAccountState extends State<CreateAccount> {
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
-                              color: Colors.black87, // Header text inside glass is black
+                              color: Colors.black87,
                             ),
                           ),
                           const SizedBox(height: 20),
@@ -113,7 +108,6 @@ class _CreateAccountState extends State<CreateAccount> {
                           _buildTextField(_phoneController, 'Phone Number', Icons.phone_outlined),
                           
                           const SizedBox(height: 8),
-                          // Date Picker updated for Black Text & Icons
                           GestureDetector(
                             onTap: () => _selectDate(context),
                             child: Container(
@@ -148,7 +142,40 @@ class _CreateAccountState extends State<CreateAccount> {
                               elevation: 0,
                             ),
                             onPressed: () async {
-                               // Registration logic here
+                                if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Email and Password are required.')),
+                                  );
+                                  return;
+                                }
+
+                                if (_selectedDate == null) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Please select your birthdate.')),
+                                  );
+                                  return;
+                                }
+                                String? result = await _authService.registration(
+                                  email: _emailController.text.trim(),
+                                  password: _passwordController.text.trim(),
+                                  username: _usernameController.text.trim(),
+                                  firstName: _firstNameController.text.trim(),
+                                  lastName: _lastNameController.text.trim(),
+                                  phone: _phoneController.text.trim(),
+                                  birthDate: _selectedDate!,
+                                );
+
+                                if (!mounted) return;
+
+                                if (result == 'Success') {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Account created successfully! Please log in.')),
+                                  );
+                                  Navigator.pop(context);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(result ?? 'An unknown error occurred.')),
+                                  );
+                                }
                             },
                             child: const Text('Sign Up', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                           ),
@@ -171,7 +198,7 @@ class _CreateAccountState extends State<CreateAccount> {
                         style: TextStyle(
                           color: Colors.black, 
                           fontWeight: FontWeight.bold, 
-                          decoration: TextDecoration.underline
+                          decoration: TextDecoration.underline, 
                         ),
                       ),
                     ),
