@@ -171,7 +171,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   Navigator.pop(currentContext);
 
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Account created successfully!')),
+                                    const SnackBar(content: Text('Account created successfully! Please Log in')),
                                   );
                                 } else{
                                   Navigator.pop(context);
