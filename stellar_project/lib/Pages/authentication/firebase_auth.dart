@@ -22,7 +22,7 @@ class AuthService {
       //check if username is taken
       final usernameCheck = await _db
           .collection('user-info')
-          .where('username', isEqualTo: username.toLowerCase)
+          .where('username', isEqualTo: username.toLowerCase())
           //.where('username', isEqualTo: username)
           .get();
 
@@ -39,7 +39,7 @@ class AuthService {
       //save metadata to uid
       await _db.collection('user-info').doc(uid).set({
         'uid': uid,
-        'username': username,
+        'username': username.trim().toLowerCase(),
         'firstName': firstName,
         'lastName': lastName,
         'birthDate': birthDate != null ? Timestamp.fromDate(birthDate) : null,
@@ -49,6 +49,8 @@ class AuthService {
         'uid': uid,
         'email': email,
         'phone': phone,
+        'username' : username.trim().toLowerCase(),
+
       });
 
       return 'Success';
@@ -124,7 +126,7 @@ class AuthService {
       if (!identifier.contains('@')) {
         final userQuery = await _db
             .collection('users')
-            .where('username', isEqualTo: identifier.trim().toLowerCase)
+            .where('username', isEqualTo: identifier.trim().toLowerCase())
             .limit(1)
             .get();
 

@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'firebaseAuth.dart';
+import 'firebase_auth.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -171,7 +171,7 @@ class _CreateAccountState extends State<CreateAccount> {
                                   Navigator.pop(currentContext);
 
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Account created successfully! Please Log in')),
+                                    const SnackBar(content: Text('Account created successfully!')),
                                   );
                                 } else{
                                   Navigator.pop(context);
