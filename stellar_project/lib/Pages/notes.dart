@@ -26,7 +26,7 @@ class _NotesPageState extends State<NotesPage> {
               onTap: () {
                 //when user taps note, brings user to edit page. 
                 
-                // Handle note tap, e.g., navigate to note details
+                //Handle note tap, e.g., navigate to note details
               },
             );
           },

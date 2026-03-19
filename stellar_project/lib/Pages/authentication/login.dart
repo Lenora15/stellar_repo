@@ -29,7 +29,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 60),
-                    // 1. Large Title
                     const Text(
                       'Stellar',
                       style: TextStyle(
@@ -40,7 +39,6 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 40),
-                    // 2. Glassmorphism Container
                     ClipRRect(
                       borderRadius: BorderRadius.circular(30),
                       child: BackdropFilter(
@@ -48,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Container(
                           padding: const EdgeInsets.all(25),
                           decoration: BoxDecoration(
-                            // Kept your dark base but made it slightly more transparent
                             color: Colors.white.withValues(alpha: 0.4),
                             borderRadius: BorderRadius.circular(30),
                             border: Border.all(color: Colors.white.withValues(alpha: 0.9)),
@@ -81,14 +78,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                     }
                                   },
                                   child: const Text('Forgot password?',
-                                    // Set to blue or white to keep it readable against the dark container
                                     style: TextStyle(color: Color.fromARGB(255, 39, 45, 57), fontSize: 13)),
                                 ),
                               ),
 
                               const SizedBox(height: 10),
 
-                              // 3. Main Login Button
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color.fromARGB(255, 39, 45, 57),
@@ -140,16 +135,12 @@ class _LoginScreenState extends State<LoginScreen> {
     return TextField(
       controller: controller,
       obscureText: obscure,
-      // 1. Text color set to Black
       style: const TextStyle(color: Colors.black), 
       decoration: InputDecoration(
-        // 2. Icon (symbol) color set to Black/Dark Grey
         prefixIcon: Icon(icon, color: Colors.black54),
         hintText: hint,
-        // 3. Hint color set to Black/Dark Grey
         hintStyle: const TextStyle(color: Colors.black38),
         filled: true,
-        // 4. Fill color set to light white so the black text is visible
         fillColor: Colors.white.withValues(alpha: 0.7), 
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
       ),

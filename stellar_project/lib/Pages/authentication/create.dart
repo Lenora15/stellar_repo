@@ -1,7 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'firebaseAuth.dart';
-import 'login.dart';
 
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
@@ -168,9 +167,13 @@ class _CreateAccountState extends State<CreateAccount> {
                                 if (!mounted) return;
 
                                 if (result == 'Success') {
+                                  final currentContext = context;
+                                  Navigator.pop(currentContext);
+
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Account created successfully! Please log in.')),
+                                    const SnackBar(content: Text('Account created successfully!')),
                                   );
+                                } else{
                                   Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(content: Text(result ?? 'An unknown error occurred.')),

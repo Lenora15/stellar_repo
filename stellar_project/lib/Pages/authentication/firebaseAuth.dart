@@ -2,7 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AuthService {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db = FirebaseFirestore.instance(
+    app: Firebase.app(),
+    databaseId: 'user-info',
+  );
 
   //save data to firebase
   Future<String?> registration({
@@ -17,7 +20,7 @@ class AuthService {
     try {
       //check if username is taken
       final usernameCheck = await _db
-          .collection('users')
+          .collection('user-info')
           .where('username', isEqualTo: username)
           .get();
 
@@ -29,16 +32,21 @@ class AuthService {
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
+      String uid = userCredential.user!.uid;
+
       //save metadata to uid
-      await _db.collection('users').doc(userCredential.user!.uid).set({
-        'uid': userCredential.user!.uid,
-        'email': email,
+      await _db.collection('user-info').doc(uid).set({
+        'uid': uid,
         'username': username,
         'firstName': firstName,
         'lastName': lastName,
-        'phone': phone,
         'birthDate': birthDate != null ? Timestamp.fromDate(birthDate) : null,
         'createdAt': FieldValue.serverTimestamp(),
+      });
+      await _db.collection('users').doc(uid).set({
+        'uid': uid,
+        'email': email,
+        'phone': phone,
       });
 
       return 'Success';
