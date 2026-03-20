@@ -228,3 +228,65 @@ from firebase_auth.dart --> AI generated debugging
     }
   }*/
   //handles username and email
+
+
+  in note_creator.dart 
+
+    @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context)
+        ),
+        actions: [
+          TextButton(
+            onPressed: _saveNote,
+            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,))
+          )
+        ]
+      ),
+      //add ability to color code notes upon creation.
+      //modifications will need to be possible to edit after creation as well. possibly in different file
+      body: Column(
+        children:[
+          
+
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20.0),
+              child: ListView(
+                children: [
+                  const SizedBox(height: 10),
+
+                  //Title
+                  TextField(
+                    controller: _titleController,
+                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
+                    decoration: const InputDecoration(
+                      hintText: 'Title',
+                      border: InputBorder.none,
+                    )
+                  ),
+
+                  //content
+                  TextField(
+                    controller: _contentController,
+                    style: const TextStyle(fontSize: 18),
+                    decoration: const InputDecoration(
+                      hintText: 'Write your note here...',
+                      hintStyle: TextStyle(fontStyle: FontStyle.italic),
+                      border: InputBorder.none,
+                    ),
+                  )
+                ]
+              )
+            )
+          )
+        ],
+      )
+    );
+  }
+}
