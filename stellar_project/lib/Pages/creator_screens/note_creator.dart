@@ -69,8 +69,24 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
     }
 
     //communication with the database
-    final db = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)' );
+    final db = FirebaseFirestore.instance;
     final uid = FirebaseAuth.instance.currentUser?.uid;
+
+    //deny if no user
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('You must be logged in to save notes.'))
+      );
+      return;
+    }
+
+    if (mounted) {
+        Navigator.pop(context); 
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Note saved!'), duration: Duration(seconds: 1)),
+        );
+      }
 
     final noteData = {
       'userID' : uid,
@@ -82,6 +98,7 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
       'lastEdited' : FieldValue.serverTimestamp(),
     };
 
+    //making sure note saved successfully
     try {
       if (widget.noteId == null){
         await db.collection('notes').add(noteData);
@@ -101,39 +118,8 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
       }
     }
   }
-    /*
-    //make sure the note saves successfully
-    try{
-      await db.collection('notes').add({
-      'userID': FirebaseAuth.instance.currentUser?.uid,
-      'title': title,
-      'content': content,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-
-    if (mounted){
-      Navigator.pop(context);
-    }
-
-    } catch (e) {
-      print("Error saving note: $e");
-
-      //display error to the user
-      if(mounted){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save note: ${e.toString()}'),
-            action: SnackBarAction(
-              label: 'Retry',
-
-              //attempt to save note again
-              onPressed: _saveNote, 
-            ),
-          ),
-        );
-      }
-    }*/
-
+   
+  //building the UI
 @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -147,7 +133,10 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
         actions: [
           TextButton(
             onPressed: _saveNote,
-            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,))          )
+            child: const Text(
+              'Save', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,)
+              )
+            )
         ]
       ),
       body: Container(

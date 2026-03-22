@@ -289,4 +289,38 @@ from firebase_auth.dart --> AI generated debugging
       )
     );
   }
-}
+
+note_creator.dart
+
+ /*
+    //make sure the note saves successfully
+    try{
+      await db.collection('notes').add({
+      'userID': FirebaseAuth.instance.currentUser?.uid,
+      'title': title,
+      'content': content,
+      'timestamp': FieldValue.serverTimestamp(),
+    });
+
+    if (mounted){
+      Navigator.pop(context);
+    }
+
+    } catch (e) {
+      print("Error saving note: $e");
+
+      //display error to the user
+      if(mounted){
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to save note: ${e.toString()}'),
+            action: SnackBarAction(
+              label: 'Retry',
+
+              //attempt to save note again
+              onPressed: _saveNote, 
+            ),
+          ),
+        );
+      }
+    }*/
