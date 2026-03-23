@@ -6,7 +6,7 @@ import 'Pages/authentication/login.dart';
 import 'themes/app_themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
-
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 
 void main() async {
@@ -16,6 +16,7 @@ void main() async {
   );
   runApp(const MyApp());
 }
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
@@ -24,73 +25,110 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  //security listeners
+  StreamSubscription<User?>? _authSubscription;
+  StreamSubscription<DocumentSnapshot>? _securitySubscription;
+
+  //theme management
   Timer? _themeTimer;
+  final ValueNotifier<DateTime> _timeNotifier = ValueNotifier(DateTime.now());
 
   @override
   void initState() {
     super.initState();
-    _themeTimer = Timer.periodic(Duration(minutes: 1), (timer) {
-      _refreshApp();
+    
+    //prevent navigation stack from resetting by updating ValueNotifier instead of
+    //calling setState()
+        _themeTimer = Timer.periodic(Duration(minutes: 1), (timer) {
+        _timeNotifier.value = DateTime.now();
+    });
+
+    //watches for password reset in real time
+    _authSubscription = FirebaseAuth.instance.authStateChanges().listen((User? user){
+      _securitySubscription?.cancel();
+
+      if (user != null) {
+      _securitySubscription = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .snapshots()
+        .listen((snapshot){
+          if (snapshot.exists){
+            final data = snapshot.data() as Map<String, dynamic>;
+
+            if (data['forceLogout'] == true) {
+              _preformSecurityLogout(user.uid);
+            }
+          }
+        });
+      }
     });
   }
-    void _refreshApp() async {
-      if (mounted){
-        setState(() {});
-      }
-    
-    try { 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null){
-        await user.getIdToken(true);
-      }
+
+  Future<void> _preformSecurityLogout(String uid) async {
+    try {
+      // Update Firestore FIRST while the user is still authenticated
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'forceLogout': false,
+      });
     } catch (e) {
-      debugPrint("Security Error: User session has expired, please log in again.");
+      debugPrint("Security reset failed: $e");
     }
+
+    // Finally, sign out to trigger the UI change
+    await FirebaseAuth.instance.signOut();
   }
-
-
-@override
-void dispose() {
-  _themeTimer?.cancel();
-  super.dispose();
-}
 
   @override
-  Widget build(BuildContext context) {
-    final currentThemeData = AppThemes.getThemeForTimeOfDay();
-
-    return MaterialApp(
-      title: 'Stellar',
-      theme: currentThemeData.theme,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(currentThemeData.backgroundImage),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: child,
-        );
-      },
-
-      // handles login state. If user is logged in, home page will display.
-      // if not they have to log in or create an account.
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot){
-          if (snapshot.connectionState == ConnectionState.waiting){
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          //takes the user to the home page upon opening/login
-          if (snapshot.hasData){
-            return const MainScreen();
-          }
-          return const LoginScreen();
-        }
-      ),
-    );
+  void dispose() {
+    _authSubscription?.cancel();
+    _securitySubscription?.cancel();
+    _themeTimer?.cancel();
+    _timeNotifier.dispose();
+    super.dispose();
   }
-}
+
+  @override
+  Widget build(BuildContext context){
+    return ValueListenableBuilder<DateTime>(
+      valueListenable: _timeNotifier,
+      builder: (context, time, _){
+        final currentThemeData = AppThemes.getThemeForTimeOfDay();
+
+          return MaterialApp(
+            title: 'Stellar',
+            theme: currentThemeData.theme,
+            builder: (context, child) {
+              return Container(
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: AssetImage(currentThemeData.backgroundImage),
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                child: child,
+              );
+            },
+
+            home: StreamBuilder<User?> (
+              stream: FirebaseAuth.instance.authStateChanges(),
+              builder: (context, snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting){
+                  return const Scaffold(
+                    body: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+                if(snapshot.hasData) {
+                  return const MainScreen();
+                }
+                return const LoginScreen();
+              },
+            ),
+          );
+        },
+      );
+    }
+  }
+  

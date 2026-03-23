@@ -230,97 +230,70 @@ from firebase_auth.dart --> AI generated debugging
   //handles username and email
 
 
-  in note_creator.dart 
+  main.dart
 
-    @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: IconButton(
-          icon: const Icon(Icons.close),
-          onPressed: () => Navigator.pop(context)
-        ),
-        actions: [
-          TextButton(
-            onPressed: _saveNote,
-            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18,))
-          )
-        ]
-      ),
-      //add ability to color code notes upon creation.
-      //modifications will need to be possible to edit after creation as well. possibly in different file
-      body: Column(
-        children:[
-          
+      /*@override
+  void initState() {
+    super.initState();
 
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20.0),
-              child: ListView(
-                children: [
-                  const SizedBox(height: 10),
-
-                  //Title
-                  TextField(
-                    controller: _titleController,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w500),
-                    decoration: const InputDecoration(
-                      hintText: 'Title',
-                      border: InputBorder.none,
-                    )
-                  ),
-
-                  //content
-                  TextField(
-                    controller: _contentController,
-                    style: const TextStyle(fontSize: 18),
-                    decoration: const InputDecoration(
-                      hintText: 'Write your note here...',
-                      hintStyle: TextStyle(fontStyle: FontStyle.italic),
-                      border: InputBorder.none,
-                    ),
-                  )
-                ]
-              )
-            )
-          )
-        ],
-      )
-    );
+  }
+    void _refreshApp() async {
+      if (mounted){
+        setState(() {});
+      }
+    
+    try { 
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null){
+        await user.getIdToken(true);
+      }
+    } catch (e) {
+      debugPrint("Security Error: User session has expired, please log in again.");
+    }
   }
 
-note_creator.dart
 
- /*
-    //make sure the note saves successfully
-    try{
-      await db.collection('notes').add({
-      'userID': FirebaseAuth.instance.currentUser?.uid,
-      'title': title,
-      'content': content,
-      'timestamp': FieldValue.serverTimestamp(),
-    });
+@override
+void dispose() {
+  _themeTimer?.cancel();
+  super.dispose();
+}*/
 
-    if (mounted){
-      Navigator.pop(context);
-    }
+    /*Widget build(BuildContext context) {
+    final currentThemeData = AppThemes.getThemeForTimeOfDay();
 
-    } catch (e) {
-      print("Error saving note: $e");
-
-      //display error to the user
-      if(mounted){
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to save note: ${e.toString()}'),
-            action: SnackBarAction(
-              label: 'Retry',
-
-              //attempt to save note again
-              onPressed: _saveNote, 
+    return MaterialApp(
+      title: 'Stellar',
+      theme: currentThemeData.theme,
+      builder: (context, child) {
+        return Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage(currentThemeData.backgroundImage),
+              fit: BoxFit.cover,
             ),
           ),
+          child: child,
         );
-      }
-    }*/
+      },
+
+      // handles login state. If user is logged in, home page will display.
+      // if not they have to log in or create an account.
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot){
+          if (snapshot.connectionState == ConnectionState.waiting){
+            return const Scaffold(
+              body: Center(child: CircularProgressIndicator()),
+            );
+          }
+          //takes the user to the home page upon opening/login
+          if (snapshot.hasData){
+            return const MainScreen();
+          }
+          return const LoginScreen();
+        }
+      ),
+    );
+  }
+}*/
