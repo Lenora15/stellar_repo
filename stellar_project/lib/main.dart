@@ -67,11 +67,17 @@ class _MyAppState extends State<MyApp> {
   }
 
   Future<void> _preformSecurityLogout(String uid) async {
-    await FirebaseAuth.instance.signOut();
+    try {
+      // Update Firestore FIRST while the user is still authenticated
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'forceLogout': false,
+      });
+    } catch (e) {
+      debugPrint("Security reset failed: $e");
+    }
 
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'forceLogout': false,
-    });
+    // Finally, sign out to trigger the UI change
+    await FirebaseAuth.instance.signOut();
   }
 
   @override
@@ -82,33 +88,6 @@ class _MyAppState extends State<MyApp> {
     _timeNotifier.dispose();
     super.dispose();
   }
-
-  /*@override
-  void initState() {
-    super.initState();
-
-  }
-    void _refreshApp() async {
-      if (mounted){
-        setState(() {});
-      }
-    
-    try { 
-      final user = FirebaseAuth.instance.currentUser;
-      if (user != null){
-        await user.getIdToken(true);
-      }
-    } catch (e) {
-      debugPrint("Security Error: User session has expired, please log in again.");
-    }
-  }
-
-
-@override
-void dispose() {
-  _themeTimer?.cancel();
-  super.dispose();
-}*/
 
   @override
   Widget build(BuildContext context){
@@ -153,41 +132,3 @@ void dispose() {
     }
   }
   
-  /*Widget build(BuildContext context) {
-    final currentThemeData = AppThemes.getThemeForTimeOfDay();
-
-    return MaterialApp(
-      title: 'Stellar',
-      theme: currentThemeData.theme,
-      builder: (context, child) {
-        return Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(currentThemeData.backgroundImage),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: child,
-        );
-      },
-
-      // handles login state. If user is logged in, home page will display.
-      // if not they have to log in or create an account.
-      home: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot){
-          if (snapshot.connectionState == ConnectionState.waiting){
-            return const Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            );
-          }
-          //takes the user to the home page upon opening/login
-          if (snapshot.hasData){
-            return const MainScreen();
-          }
-          return const LoginScreen();
-        }
-      ),
-    );
-  }
-}*/
