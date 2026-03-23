@@ -45,7 +45,7 @@ class _NotesPageState extends State<NotesPage>{
         return AlertDialog(
           backgroundColor: const Color.fromARGB(255, 39, 45, 57),
           title: const Text('Delete Notes?', style: TextStyle(color: Colors.white)),
-          content: Text('Are you sure you want to delete ${_selectedNoteIds.length} note(s)?', 
+          content: Text('Are you sure you want to delete ${_selectedNoteIds.length} notes?', 
             style: const TextStyle(color: Colors.white70)),
           actions: [
             TextButton(
@@ -177,7 +177,7 @@ class _NotesPageState extends State<NotesPage>{
                   value: _sortBy,
                   dropdownColor: Color.fromARGB(255, 32, 45, 57),
                   underline: const SizedBox(),
-                  items: <String>['Newest', 'Oldest', 'Color'].map((String value) {
+                  items: <String>['Newest', 'Oldest'].map((String value) { //add sort by color
                     return DropdownMenuItem<String>(
                       value: value,
                       child: Text('Sort By: $value'),
@@ -353,48 +353,3 @@ class _NotesPageState extends State<NotesPage>{
     );
   }
 }
-
-
-
-
-
-/*class _NotesPageState extends State<NotesPage> {
-  @override
-  Widget build(BuildContext context) {
-  return Scaffold(
-      backgroundColor: (Colors.transparent),
-
-      //implement list of notes, the titles will be called from the edatabase
-      body: ListView.builder(
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text('Note ${index + 1}'),
-              onTap: () {
-                //when user taps note, brings user to edit page. 
-                
-                //Handle note tap, e.g., navigate to note details
-              },
-            );
-          },
-        ),
-        //giving notes the location of bottomnavbar
-
-        //creating the add button for the notes. 
-        floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 75.0),
-        child: FloatingActionButton(
-          // Handle add note action, e.g., navigate to note creation page
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const NoteCreatorPage()),
-            );
-            
-          },
-          child: const Icon(Icons.add),
-        ),
-      )
-    );
-  }
-}*/
-

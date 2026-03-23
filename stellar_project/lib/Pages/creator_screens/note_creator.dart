@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 //this is where notes.dart will take you when you go to create a new note. 
@@ -119,7 +118,7 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
     }
   }
    
-  //building the UI
+//building the UI
 @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -165,6 +164,7 @@ class _NoteCreatorPageState extends State<NoteCreatorPage> {
                           color: color,
                           shape: BoxShape.circle,
                           border: Border.all(
+                            //review color.value. it is depreciated
                             color: _selectedColor == color.value ? Colors.black87 : Colors.transparent,
                             width: 3,
                           ),
