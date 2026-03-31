@@ -57,7 +57,7 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.exists){
             final data = snapshot.data() as Map<String, dynamic>;
 
-            if (data['forceLogout'] == true) {
+            if (data != null && data['forceLogout'] == true) {
               _preformSecurityLogout(user.uid);
             }
           }
@@ -68,7 +68,6 @@ class _MyAppState extends State<MyApp> {
 
   Future<void> _preformSecurityLogout(String uid) async {
     try {
-      // Update Firestore FIRST while the user is still authenticated
       await FirebaseFirestore.instance.collection('users').doc(uid).update({
         'forceLogout': false,
       });
@@ -76,7 +75,6 @@ class _MyAppState extends State<MyApp> {
       debugPrint("Security reset failed: $e");
     }
 
-    // Finally, sign out to trigger the UI change
     await FirebaseAuth.instance.signOut();
   }
 
@@ -89,18 +87,18 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context){
-    return ValueListenableBuilder<DateTime>(
-      valueListenable: _timeNotifier,
-      builder: (context, time, _){
-        final currentThemeData = AppThemes.getThemeForTimeOfDay();
-
-          return MaterialApp(
-            title: 'Stellar',
-            theme: currentThemeData.theme,
-            builder: (context, child) {
-              return Container(
+@override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Stellar',
+      builder: (context, child) {
+        return ValueListenableBuilder<DateTime>(
+          valueListenable: _timeNotifier,
+          builder: (context, time, _) {
+            final currentThemeData = AppThemes.getThemeForTimeOfDay();
+            return Theme(
+              data: currentThemeData.theme,
+              child: Container(
                 decoration: BoxDecoration(
                   image: DecorationImage(
                     image: AssetImage(currentThemeData.backgroundImage),
@@ -108,27 +106,24 @@ class _MyAppState extends State<MyApp> {
                   ),
                 ),
                 child: child,
-              );
-            },
-
-            home: StreamBuilder<User?> (
-              stream: FirebaseAuth.instance.authStateChanges(),
-              builder: (context, snapshot){
-                if (snapshot.connectionState == ConnectionState.waiting){
-                  return const Scaffold(
-                    body: Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if(snapshot.hasData) {
-                  return const MainScreen();
-                }
-                return const LoginScreen();
-              },
-            ),
-          );
+              ),
+            );
+          },
+        );
+      },
+      home: StreamBuilder<User?>(
+        stream: FirebaseAuth.instance.authStateChanges(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Scaffold(body: Center(child: CircularProgressIndicator()));
+          }
+          if (snapshot.hasData) {
+            return const MainScreen();
+          }
+          return const LoginScreen();
         },
-      );
-    }
+      ),
+    );
   }
+}
   
