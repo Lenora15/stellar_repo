@@ -41,4 +41,36 @@
                 "are you sure you want to cancle" Options: yes and no (when class tapped on)
 
 Aesthetics will follow given images of AI generated examples of the app
-             
+
+Class requires: 
+id
+course name
+instructor
+room
+day it occurs
+start time
+end time
+color value
+skipped dates
+
+event requires:
+title
+is all day -- bool
+date
+start time
+end time
+location -- stored as string
+reminder -- minutes before
+Note
+color value
+does repeat
+
+Reminder requires
+title
+is all day -- bool
+time
+date
+does repeat
+    how many times 
+        when
+is completed
