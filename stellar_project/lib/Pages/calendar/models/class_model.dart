@@ -13,6 +13,7 @@ class ClassModel{
   final String endTime;
   final int colorValue; //user will be able to color code
   final List<String> skippedDays; //user will be able to mark a class as skipped which will put that date in this list
+  final int position;
 
   //constructor
   ClassModel({
@@ -25,6 +26,7 @@ class ClassModel{
     required this.endTime,
     required this.colorValue,
     required this.skippedDays,
+    required this.position
   });
 
   //factory named constructor 
@@ -45,7 +47,60 @@ class ClassModel{
       endTime: data['endTime'] ?? '',
       colorValue: data['color'] ?? 0xFF9C27B0,
       skippedDays: List<String>.from(data['skippedDays'] ?? []),
-
+      position: data['position'] ?? 0,
     );
   }
+
+  //method to convert the class back into a map for storage in the database
+  Map<String, dynamic> toMap(){
+    return {
+      'courseName': courseName,
+      'instructor': instructor,
+      'room': room,
+      'daysOfWeek': daysOfWeek,
+      'startTime': startTime,
+      'endTime': endTime,
+      'color': colorValue,
+      'skippedDays': skippedDays,
+      'position': position,
+    };
+  }
+
+  //allows the change of a final variable by creating a new copy
+  ClassModel copyWith({
+    String? id,
+    String? courseName,
+    String? instructor,
+    String? room,
+    List<int>? daysOfWeek,
+    String? startTime,
+    String? endTime,
+    int? colorValue,
+    List<String>? skippedDays,
+    int? position,
+  }){
+    return ClassModel(
+      id: this.id,
+      courseName: courseName ?? this.courseName,
+      instructor: instructor ?? this.instructor,
+      room: room ?? this.room,
+      daysOfWeek: daysOfWeek ?? this.daysOfWeek,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      colorValue: colorValue ?? this.colorValue,
+      skippedDays: skippedDays ?? this.skippedDays,
+      position: position ?? this.position,
+     );
+   }
+  
+  //equality check: two classes are the same if they have the same id
+  @override
+  bool operator ==(Object other) =>
+  identical(this, other) ||
+  other is ClassModel &&
+    runtimeType == other.runtimeType &&
+    id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }

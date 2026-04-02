@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
 import 'home.dart';
-import 'calendar/calendar_drawer.dart';
+import 'calendar/calendar_view.dart';
 import 'chat.dart';
 import 'notes.dart';
 import 'profile.dart';

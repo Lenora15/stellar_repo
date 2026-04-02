@@ -31,7 +31,7 @@
                 plus button to add to that specific day -- tapping on event within this view takes to page with more details
                 -- can edit here
             
-            4. tapping and holding event gives option to edit or delete. 
+            4. tapping and holding event gives option to edit or delete or move position. 
 
         
         Dual path detail system

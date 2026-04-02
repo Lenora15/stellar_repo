@@ -36,8 +36,10 @@ class EventModel{
     required this.endDateTime,
     required this.note,
     required this.reminderMinutes,
-    required this.isRecurring,
     required this.colorValue,
+
+    //recurring event fields
+    required this.isRecurring,
 
     //no required because these only apply if the event is recurring
     this.frequency = 'none',
@@ -53,8 +55,89 @@ class EventModel{
       id: doc.id,
       title: data['title'] ?? 'untitled',
       isAllDay: data['isAllDay'] ?? false,
-      startDateTime: data[]
+      startDateTime: data['startDateTime'] != null ? (data['startDateTime'] as Timestamp).toDate() : DateTime.now(),
+      endDateTime: data['endDateTime'] != null ? (data['endDateTime'] as Timestamp).toDate() : DateTime.now(),
+      note: data['note'] ?? '',
+      reminderMinutes: List<int>.from(data['reminderMinutes'] ?? []),
+      colorValue: data['color'] ?? 0xFF2196F3,
+
+      //recurring event fields
+      isRecurring: data['isRecurring'] ?? false,
+      frequency: data['frequency'] ?? 'none',
+      interval: data['interval'] ?? 1,
+      repeatDays: List<int>.from(data['repeatDays'] ?? []),
+      endDate: data['endDate'] != null ? (data['endDate'] as Timestamp).toDate() : null,
+      skippedDates: List<String>.from(data['skippedDates'] ?? []),
     );
   }
 
+  //method to convert the event back into a map for storage in the database
+  Map<String, dynamic> toMap(){
+    return {
+      'title': title,
+      'isAllDay': isAllDay,
+      'startDateTime': Timestamp.fromDate(startDateTime),
+      'endDateTime': Timestamp.fromDate(endDateTime),
+      'note': note,
+      'reminderMinutes': reminderMinutes,
+      'color': colorValue,
+
+      //recurring event fields
+      'isRecurring': isRecurring,
+      if(isRecurring) ...{
+        'frequency': frequency,
+        'interval': interval,
+        'repeatDays': repeatDays,
+        if(endDate != null) 'endDate': Timestamp.fromDate(endDate!),
+        'skippedDates': skippedDates,
+      },
+    };
+  }
+
+  //allows the change of a final variable by creating a new copy
+  EventModel copyWith({
+    String? title,
+    bool? isAllDay,
+    DateTime? startDateTime,
+    DateTime? endDateTime,
+    String? note,
+    List<int>? reminderMinutes,
+    int? colorValue,
+
+    //recurring event fields
+    bool? isRecurring,
+    String? frequency,
+    int? interval,
+    List<int>? repeatDays,
+    DateTime? endDate,
+    List<String>? skippedDates,
+  }){
+    return EventModel(
+      id: id, //id should not change
+      title: title ?? this.title,
+      isAllDay: isAllDay ?? this.isAllDay,
+      startDateTime: startDateTime ?? this.startDateTime,
+      endDateTime: endDateTime ?? this.endDateTime,
+      note: note ?? this.note,
+      reminderMinutes: reminderMinutes ?? this.reminderMinutes,
+      colorValue: colorValue ?? this.colorValue,
+
+      //recurring event fields
+      isRecurring: isRecurring ?? this.isRecurring,
+      frequency: frequency ?? this.frequency,
+      interval: interval ?? this.interval,
+      repeatDays: repeatDays ?? this.repeatDays,
+      endDate: endDate ?? this.endDate,
+      skippedDates: skippedDates ?? this.skippedDates,
+    );
+  }
+
+  //equality check: two events are the same if they have the same id
+  @override
+  bool operator ==(Object other) =>
+  identical(this, other) ||
+  other is EventModel && runtimeType == other.runtimeType && id == other.id;
+
+  @override
+  int get hashCode => id.hashCode;
 }
