@@ -57,6 +57,7 @@ class _MyAppState extends State<MyApp> {
           if (snapshot.exists){
             final data = snapshot.data() as Map<String, dynamic>;
 
+            //work on this when debugging. 
             if (data != null && data['forceLogout'] == true) {
               _preformSecurityLogout(user.uid);
             }

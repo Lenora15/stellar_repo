@@ -1,0 +1,44 @@
+1. fix forced logout --> right now it doesnt work but that is not priority. 
+2. work on calendar
+
+    calendar
+        Navigation drawer --
+            1. view selector -- top of the drawer (year, month, week, day)
+            2. Schedule Display toggle -- ability to view schedule within the calendar
+            3. Scheudle -- displays classes as cards that hold the metadata -- ability to tap 
+            and cancle a class -- when tapped prompt "are you sure you want to cancle this class today"
+            4. edit button -- ability to add and edit class schedule
+
+        Main Calendar view -- 
+        1. Tapping on a day selects which day you are viewing as a card. 
+            a. swiping up gives a list of the day's events in chrolologicsl order. When in this view, can only
+            see that week. -- also in this view, events only show up as bars of color
+            b. swiping back down expands calendar, allows user to see event names 
+
+            IN BOTH VIEWS DAYS ARE NUMBERED AND DAY NAMES ARE LABLED AS S,M,T,W,T, OR F
+
+            2. plus button in the bottom right to add events 
+                a. event creator will have a title, toggle All day, color selection, date selector, 
+                time selector (options for AM or PM), Location (only exists as a string of text),
+                when to remind (ex: 10 mins before), Note
+                b. option to create a reminder instead of an event --
+                    includes: title, All day?, date, time, AM or PM, repeats? and how often
+
+                Both will have the option to cancle or save
+            
+            3. tapping on events within calendar view -- displays all events for that day in chrolological order
+            to the left: time when starts, color, then event name. under event name: what time to what time
+                plus button to add to that specific day -- tapping on event within this view takes to page with more details
+                -- can edit here
+            
+            4. tapping and holding event gives option to edit or delete. 
+
+        
+        Dual path detail system
+            1. when tapping on class (within calendar view), displays class card with metadata.
+            display only
+            2. when tapping on class (within schedule drawer) gives option to cancel class.
+                "are you sure you want to cancle" Options: yes and no (when class tapped on)
+
+Aesthetics will follow given images of AI generated examples of the app
+             
