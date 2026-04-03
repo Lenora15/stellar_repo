@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
-import 'calendar/calendar_view.dart';
+import 'calendar/calendar_host.dart';
 import 'chat.dart';
 import 'notes.dart';
 import 'profile.dart';
@@ -17,7 +17,7 @@ class _MainScreenState extends State<MainScreen> {
   
   static const List<Widget> _widgetOptions = <Widget>[
     HomeContent(),
-    CalendarPage(),
+    CalendarHost(),
     ChatPage(),
     NotesPage(),
     ProfilePage(),

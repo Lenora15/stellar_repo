@@ -130,6 +130,12 @@ Future<void> toggleSkipClass(ClassModel classModel, DateTime date) async {
 
   // -----EVENT STUFF -----//
 
+  Stream<List<EventModel>> get allEvents {
+    return _eventRef.snapshots().map((snapshot) {
+      return snapshot.docs.map((doc) => EventModel.fromFirestore(doc)).toList();
+    });
+  }
+
   //grabbing standard events for specific day
   Stream<List<EventModel>> getEventsForDay(DateTime date) {
     final start = DateTime(date.year, date.month, date.day);

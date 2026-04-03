@@ -74,3 +74,251 @@ does repeat
     how many times 
         when
 is completed
+
+Calendar Master Blueprint
+Navigation Drawer
+
+View Selector: Top of the drawer (Year, Month, Week, Day).
+
+Schedule Display Toggle: Master switch to view or hide the schedule (classes) within the main calendar view.
+
+Schedule (Class List): Displays classes as sleek cards holding metadata.
+
+Visuals: Class name at the top (no details button), instructor, room number, days of the week (abbreviations: M, W, F), start/end time.
+
+Color Indicator: A vertical color bar that goes halfway down the left side of the card.
+
+Gestures:
+
+Tap: Prompts "Are you sure you want to cancel this class today?" (Options: Yes / No).
+
+Tap & Hold: Card displays three icons: Pencil (Edit), Trash Can (Delete), and Hamburger (Move position/Reorder).
+
+Edit Button: Ability to add and edit the overall class schedule.
+
+Main Calendar View
+
+Day Selection (Swipe System): Tapping on a day selects which day you are viewing as a card.
+
+a. Swiping up gives a list of the day's events in chronological order. When in this view, the calendar shrinks to only see that week. Note: In this view, events on the grid only show up as bars of color.
+
+b. Swiping back down expands the calendar to the full month, allowing the user to see actual event names on the grid.
+
+IN BOTH VIEWS: Days are numbered and day names are strictly labeled as S, M, T, W, T, F, S.
+
+Plus Button: Bottom right to add events.
+
+a. Event Creator: Title, toggle All day, color selection, date selector, time selector (options for AM or PM), Location (only exists as a string of text), when to remind (ex: 10 mins before), Note.
+
+b. Reminder Creator: Option to create a reminder instead of an event. Includes: Title, All day?, date, time, AM or PM, repeats? and how often.
+
+Both will have the option to cancel or save.
+
+Daily Agenda (Tapping Events): Tapping on events within the calendar view displays all events for that day in chronological order.
+
+Layout: To the left: time when starts, color, then event name. Under event name: what time to what time.
+
+Specific Add: Plus button to add to that specific day.
+
+Specific Edit: Tapping on an event within this daily view takes you to a page with more details where you can edit it.
+
+Quick Edit/Delete: Tapping and holding an event on the main calendar gives the option to edit or delete.
+
+Dual Path Detail System
+
+Path A (Calendar View): When tapping on a class within the main calendar view, it displays the class card with metadata. Display only.
+
+Path B (Schedule Drawer): When tapping on a class within the schedule drawer, it gives the option to cancel the class for that day. ("Are you sure you want to cancel?" Options: Yes / No).
+
+Note: Aesthetics will follow a clean, celestial style driven by the app's external time-of-day theme engine.
+
+
+1. Architecture & File Structure (Host & Children)
+To handle multiple views cleanly without creating a massive, unreadable file, the calendar uses a "Manager" pattern.
+
+calendar_host.dart: The shell. Holds the Scaffold, dynamic time-of-day theme/background, top navigation, and the drawer. It swaps the views below.
+
+year_view.dart: Dedicated grid for the yearly overview.
+
+month_week_view.dart: Handles both Month and Week views (since they share the swipe-up logic and table_calendar grid).
+
+day_view.dart: A vertical timeline of hours for a specific day.
+
+Widgets: class_card.dart, event_item.dart, time_picker.dart.
+
+2. Navigation Drawer (The Schedule)
+View Selector: Top of the drawer (Year, Month, Week, Day).
+
+Schedule Display Toggle: Master switch to view or hide the schedule (classes) on the main calendar grid.
+
+Schedule (Class List): Displays classes as sleek class_card widgets.
+
+Visuals: Class name at the top (no details button), instructor, room number, abbreviated days (M, W, F), and start/end time.
+
+Color Indicator: A vertical color bar that goes exactly halfway down the left side of the card.
+
+Gestures:
+
+Tap: Prompts "Are you sure you want to cancel this class today?" (Options: Yes / No).
+
+Tap & Hold: Card displays three icons: Pencil (Edit), Trash Can (Delete), and Hamburger (Move position/Reorder).
+
+Edit Button: Ability to add and edit the overall recurring class schedule.
+
+3. Main Calendar View (The Grid)
+Layout: Full vertical scroll layout. The top header displays only the Month Name (e.g., "APRIL" — no year, no numbers). The grid days are strictly labeled S, M, T, W, T, F, S.
+
+The Swipe System (Day Selection): Tapping a day selects it.
+
+Swipe Up (on the agenda overlay): Shrinks the calendar to a single Week view, revealing the chronological list of events for that week below it.
+
+Swipe Down: Expands the calendar back to the full Month view.
+
+Grid Visual Hierarchy (The "Bars"):
+
+Events (One-offs): Solid color blocks (e.g., solid blue background, white text).
+
+Classes (Schedule): Translucent background with a solid colored outline matching the class color.
+
+Canceled / Completed: Dimmed opacity with a strikethrough over the text.
+
+Plus Button: Bottom right, offset higher with padding so it isn't swallowed by the app's bottom navigation bar.
+
+4. The Creator Box (Stellar Samsung Hybrid)
+No full-screen creation pages. Tapping the Plus button slides up a frosted glass modal bottom sheet (the "White Box").
+
+Header: "Cancel" (left), [ Event | Reminder ] toggle (center), "Save" (right).
+
+Layout (Top to Bottom):
+
+Title: Large, prominent text field.
+
+Time Block: "All day" toggle. Below it: Start Date & Time, End Date & Time. (If "All day" is toggled ON, the time pickers smoothly collapse).
+
+Color Row: Horizontal scrolling row of curated, solid colored circles. Interaction: Tapping a color shrinks it slightly and adds a crisp grey outline.
+
+Details List (Icon + Text):
+
+📍 Location
+
+🔔 Alert (Menu: No alert, At time of event, 10 minutes before, 1 hour before, 1 day before, Custom).
+
+🔁 Repeat
+
+📝 Notes
+
+Reminder Mode: If toggled to Reminder, the box shrinks, hiding the End Date/Time, Color Picker, Location, and Notes.
+
+5. Daily Agenda & Dual Path System
+Daily Agenda: Tapping on a specific day in the grid populates the bottom agenda view. It lists events in chronological order: [Start Time] | [Color Indicator] | [Event Name]. Under the name: [Start Time - End Time]. Includes a specific "Add" button just for that day.
+
+Path A (Calendar View): Tapping a class on the grid opens a display-only metadata card.
+
+Path B (Schedule Drawer): Tapping a class in the drawer opens the "Cancel for today" prompt.
+
+
+Option B is a fantastic choice. Having the time picker appear as a centered, frosted-glass pop-up keeps the user's focus exactly where it needs to be without making the bottom sheet jump around or feel cluttered.
+
+Here is the final, comprehensive, and watertight Stellar Samsung Calendar Blueprint. This covers every single architectural decision, visual rule, and interaction we have locked in.
+
+🌌 The Stellar Calendar Master Blueprint
+1. Architecture & File Structure
+To handle multiple views cleanly without creating a massive, unreadable file, the calendar uses a "Host and Children" pattern.
+
+calendar_host.dart: The shell. Holds the Scaffold, dynamic time-of-day background, top navigation, drawer connection, and the bottom agenda overlay. It swaps the grid views below.
+
+year_view.dart: Dedicated grid for the yearly overview.
+
+month_week_view.dart: Handles both Month and Week views (since they share the swipe-up logic and table_calendar grid).
+
+day_view.dart: A vertical timeline of hours for a specific day.
+
+Widgets Folder: * class_card.dart
+
+event_item.dart
+
+time_picker.dart
+
+2. Navigation Drawer & Dedicated Screens
+View Selector: Top of the drawer (Year, Month, Week, Day).
+
+Reminders Tab: Routes the user to a dedicated full-screen to-do list, grouped by Past, Today, and Upcoming. Includes a circular checkbox to mark items completed (which strikes them through and drops them to the bottom).
+
+Schedule Display Toggle: Master switch to view or hide the schedule (classes) on the main calendar grid.
+
+Schedule (Class List): Displays classes using class_card.dart.
+
+Visuals: Class name at the top (no details button), instructor, room number, abbreviated days (M, W, F), and start/end time.
+
+Color Indicator: A vertical color bar that goes exactly halfway down the left side of the card.
+
+Gestures:
+
+Tap: Prompts "Are you sure you want to cancel this class today?" (Options: Yes / No).
+
+Tap & Hold: Card displays three icons: Pencil (Edit), Trash Can (Delete), and Hamburger (Move position/Reorder).
+
+Edit Button: Ability to add and edit the overall recurring class schedule.
+
+3. Main Calendar View (The Grid)
+Layout: Full vertical scroll layout. The top header displays only the Month Name (e.g., "APRIL" — no year, no numbers). The grid days are strictly labeled S, M, T, W, T, F, S.
+
+The Swipe System (Day Selection): Tapping a day selects it.
+
+Swipe Up (on the agenda overlay): Shrinks the calendar to a single Week view, revealing the chronological list of events for that week below it.
+
+Swipe Down: Expands the calendar back to the full Month view.
+
+Grid Visual Hierarchy (The "Bars"):
+
+Events (One-offs): Solid color blocks (e.g., solid blue background, white text).
+
+Classes (Schedule): Translucent background with a solid colored outline matching the class color.
+
+Reminders: 100% invisible on this grid.
+
+Canceled / Completed: Dimmed opacity with a strikethrough over the text.
+
+Plus Button: Bottom right, offset higher with padding so it isn't swallowed by the app's bottom navigation bar.
+
+4. The Creator Box (Stellar Samsung Hybrid)
+No full-screen creation pages. Tapping the Plus button slides up a frosted glass modal bottom sheet.
+
+Header: "Cancel" (left), [ Event | Reminder ] toggle (center), "Save" (right).
+
+Mode A: Event
+
+Title: Large, prominent text field.
+
+Time Block: "All day" toggle. Below it: Start Date & Time, End Date & Time. (If "All day" is toggled ON, the time pickers smoothly collapse).
+
+Color Row: Horizontal scrolling row of curated, solid colored circles. Interaction: Tapping a color shrinks it slightly and adds a crisp grey outline.
+
+Details List (Icon + Text):
+
+📍 Location
+
+🔔 Alert (Menu: No alert, At time of event, 10 minutes before, 1 hour before, 1 day before, Custom).
+
+🔁 Repeat
+
+📝 Notes
+
+Mode B: Reminder
+
+Toggling to Reminder shrinks the box. It drops the End Date/Time, Color Picker, Location, and Notes. It only asks for: Title, Date, Time, and Repeat settings.
+
+5. Daily Agenda & Time Picker (Widgets)
+Daily Agenda Box (Bottom Overlay): Tapping on a specific day in the grid populates the bottom agenda view. It lists items in chronological order with a specific "Add" button just for that day.
+
+Events & Classes: Displayed with their respective solid or outlined color bars.
+
+Reminders: Displayed with a bell icon instead of a color bar. Includes a circular checkbox; tapping it marks isCompleted: true, applies a strikethrough, dims it, and drops it to the bottom of the list.
+
+Time Picker (time_picker.dart):
+
+Visuals: A 3-column scrolling spinner wheel (Hours | Minutes | AM/PM).
+
+Interaction: Pops up as a centered, frosted-glass modal over the dimmed Creator Box.
+
+Smart Defaults: Start time defaults to the next half-hour. End time defaults to exactly 1 hour after the selected Start time.
