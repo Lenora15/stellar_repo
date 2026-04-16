@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import '../models/class_model.dart';
 import '../models/event_model.dart';
 import '../models/reminder_model.dart';
@@ -16,10 +15,7 @@ class DatabaseService{
 
   //constructor that initializes the database connection for the calendar info database
   DatabaseService({required this.uid}){
-    _db = FirebaseFirestore.instanceFor(
-      app: Firebase.app(),
-      databaseId: 'calendar-info',
-    );
+    _db = FirebaseFirestore.instance;
   }
 
   //references to the specific collections in the database that will be working with.

@@ -70,33 +70,74 @@ class _CreatorBoxState extends State<CreatorBox> {
   }
 
   void _handleSave() async {
-    if (_titleController.text.isEmpty) return;
-
-    if (_isEventMode) {
-      final newEvent = EventModel(
-        id: '', 
-        title: _titleController.text,
-        isAllDay: _isAllDay,
-        startDateTime: DateTime(_startDate.year, _startDate.month, _startDate.day, _startTime.hour, _startTime.minute),
-        endDateTime: DateTime(_endDate.year, _endDate.month, _endDate.day, _endTime.hour, _endTime.minute),
-        note: _noteController.text,
-        reminderMinutes: [10],
-        colorValue: _selectedColor,
-        isRecurring: false,
-      );
-      await widget.dbService.addEvent(newEvent);
-    } else {
-      final newReminder = ReminderModel(
-        id: '',
-        title: _titleController.text,
-        dateTime: DateTime(_startDate.year, _startDate.month, _startDate.day, _startTime.hour, _startTime.minute),
-        isCompleted: false,
-      );
-      await widget.dbService.addReminder(newReminder);
+    //handling title for the event. 
+    String title = _titleController.text.trim();
+    if (title.isEmpty) {
+      title = _isEventMode ? "Untitled Event" : "Untitled Reminder";
     }
-    if (mounted) Navigator.pop(context);
-  }
 
+    DateTime start = DateTime(
+      _startDate.year,
+      _startDate.month,
+      _startDate.day,
+      _startDate.hour,
+      _startDate.minute,
+    );
+
+    DateTime end = DateTime(
+      _endDate.year,
+      _endDate.month,
+      _endDate.day,
+      _endDate.hour,
+      _endDate.minute,
+    );
+
+    //have to do both reminder and event
+    try{
+      if (_isEventMode) {
+        //handling event creation here
+        final newEvent = EventModel(
+          id: '',
+          title: title,
+          isAllDay: _isAllDay,
+          startDateTime: start,
+          endDateTime: end,
+          note: _noteController.text.trim(),
+          reminderMinutes: [],
+          colorValue: _selectedColor,
+          isRecurring: false,
+        );
+        await widget.dbService.addEvent(newEvent);
+      } else {
+        //handling reminder creation here
+        final newReminder = ReminderModel(
+          id: '',
+          title: title,
+          dateTime: start,
+          isCompleted: false,
+          recurrence: null,
+        );
+        await widget.dbService.addReminder(newReminder);
+      }
+      //close the creator box and show success message
+      if (mounted) {
+        Navigator.pop(context); 
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_isEventMode ? 'Event saved!' : 'Reminder saved!'), duration: const Duration(seconds: 1)),
+        );
+      }
+    } catch (e) {
+      //error handling
+      print("Error saving: $e");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save ${_isEventMode ? 'event' : 'reminder'}. Please try again.'))
+        );
+      }
+    }
+  }
+  //building the UI for the creator box
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -105,29 +146,27 @@ class _CreatorBoxState extends State<CreatorBox> {
           child: ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
             child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30), // Heavy blur for that "milky" look
+              filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(
                 decoration: BoxDecoration(
                   color: Colors.white, 
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                  border: Border.all(color: Colors.white.withOpacity(0.4), width: 1.5),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
                 ),
               ),
             ),
           ),
         ),
 
-
+        //actual content of the creator box
         Column(
           children: [
-
             Container(
               margin: const EdgeInsets.only(top: 12),
               height: 5,
               width: 40,
               decoration: BoxDecoration(color: _standardDark, borderRadius: BorderRadius.circular(10)),
             ),
-
 
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20),
@@ -144,23 +183,23 @@ class _CreatorBoxState extends State<CreatorBox> {
                     style: TextStyle(color: _standardDark, fontSize: 32, fontWeight: FontWeight.w600),
                     decoration: InputDecoration(
                       hintText: _isEventMode ? "Title" : "Title",
-                      hintStyle: TextStyle(color: _standardDark.withOpacity(0.2)),
+                      hintStyle: TextStyle(color: _standardDark.withValues(alpha: 0.2)),
                       border: InputBorder.none,
                     ),
                   ),
                   
-                  Divider(color: _standardDark.withOpacity(0.1), height: 32),
+                  Divider(color: _standardDark.withValues(alpha: 0.1), height: 32),
                   
                   if (_isEventMode)
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: Text("All day", style: TextStyle(color: _standardDark, fontSize: 16, fontWeight: FontWeight.w500)),
                       value: _isAllDay,
-                      activeColor: Colors.blueAccent,
+                      activeColor: Colors.deepPurpleAccent,
                       onChanged: (val) => setState(() => _isAllDay = val),
                     ),
 
-
+                  //date and time pickers
                   _buildDateTimeRow(true),
                   if (_isEventMode) ...[
                     const SizedBox(height: 16),
@@ -171,14 +210,12 @@ class _CreatorBoxState extends State<CreatorBox> {
 
 
                   if (_isEventMode) ...[
-                    Text("Theme Color", style: TextStyle(color: _standardDark.withOpacity(0.5), fontWeight: FontWeight.bold, fontSize: 13)),
+                    Text("Color", style: TextStyle(color: _standardDark.withValues(alpha: 0.5), fontWeight: FontWeight.bold, fontSize: 13)),
                     const SizedBox(height: 15),
                     _buildColorRow(),
                   ],
 
                   const SizedBox(height: 30),
-
-                  _buildMetadataTile(Icons.location_on_outlined, "Location"),
                   _buildMetadataTile(Icons.notifications_none_outlined, "Alert"),
                   _buildMetadataTile(Icons.notes_outlined, "Notes"),
                 ],
@@ -192,10 +229,11 @@ class _CreatorBoxState extends State<CreatorBox> {
     );
   }
 
+  //switch between event and reminder creation modes
   Widget _buildStellarToggle() {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: Colors.black.withOpacity(0.05), borderRadius: BorderRadius.circular(15)),
+      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(15)),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -214,9 +252,9 @@ class _CreatorBoxState extends State<CreatorBox> {
         decoration: BoxDecoration(
           color: active ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: active ? [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 4)] : [],
+          boxShadow: active ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : [],
         ),
-        child: Text(label, style: TextStyle(color: active ? _standardDark : _standardDark.withOpacity(0.4), fontWeight: FontWeight.bold)),
+        child: Text(label, style: TextStyle(color: active ? _standardDark : _standardDark.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -227,7 +265,7 @@ class _CreatorBoxState extends State<CreatorBox> {
 
     return Row(
       children: [
-        Icon(Icons.calendar_today, color: _standardDark.withOpacity(0.6), size: 20),
+        Icon(Icons.calendar_today, color: _standardDark.withValues(alpha: 0.6), size: 20),
         const SizedBox(width: 15),
         
 
@@ -283,7 +321,7 @@ class _CreatorBoxState extends State<CreatorBox> {
             decoration: BoxDecoration(
               color: Color(c),
               shape: BoxShape.circle,
-              border: sel ? Border.all(color: _standardDark.withOpacity(0.3), width: 3) : null,
+              border: sel ? Border.all(color: _standardDark.withValues(alpha: 0.3), width: 3) : null,
             ),
           ),
         );
@@ -294,9 +332,9 @@ class _CreatorBoxState extends State<CreatorBox> {
   Widget _buildMetadataTile(IconData icon, String label) {
     return ListTile(
       contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: _standardDark.withOpacity(0.4)),
-      title: Text(label, style: TextStyle(color: _standardDark.withOpacity(0.6), fontSize: 16)),
-      trailing: Icon(Icons.chevron_right, color: _standardDark.withOpacity(0.2)),
+      leading: Icon(icon, color: _standardDark.withValues(alpha: 0.4)),
+      title: Text(label, style: TextStyle(color: _standardDark.withValues(alpha: 0.6), fontSize: 16)),
+      trailing: Icon(Icons.chevron_right, color: _standardDark.withValues(alpha: 0.2)),
     );
   }
 
@@ -308,7 +346,7 @@ class _CreatorBoxState extends State<CreatorBox> {
           Expanded(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel", style: TextStyle(color: _standardDark.withOpacity(0.6), fontSize: 16)),
+              child: Text("Cancel", style: TextStyle(color: _standardDark.withValues(alpha: 0.6), fontSize: 16)),
             ),
           ),
           const SizedBox(width: 20),

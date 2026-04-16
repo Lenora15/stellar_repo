@@ -82,7 +82,7 @@ class _NotesPageState extends State<NotesPage>{
   Widget build(BuildContext context){
     //determining which user's information to show
     final currentUser = FirebaseAuth.instance.currentUser;
-    final notesDB = FirebaseFirestore.instanceFor(app: Firebase.app(), databaseId: '(default)');
+    final notesDB = FirebaseFirestore.instance;
     return Scaffold(
       backgroundColor: Colors.transparent,
 

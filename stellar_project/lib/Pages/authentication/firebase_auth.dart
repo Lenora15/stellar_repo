@@ -3,10 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 class AuthService {
-  final FirebaseFirestore _db = FirebaseFirestore.instanceFor(
-    app: Firebase.app(),
-    databaseId: 'user-info',
-  );
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   //save data to firebase
   Future<String?> registration({
