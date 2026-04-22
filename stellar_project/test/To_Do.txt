@@ -1,5 +1,4 @@
-1. fix forced logout --> right now it doesnt work but that is not priority. 
-2. work on calendar
+
 
     calendar
         Navigation drawer --

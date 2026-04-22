@@ -38,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
       body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Color(0xFF21263B).withValues(alpha:0.8),
+          color: Color(0xFF21263B),
         ),
         child: BottomNavigationBar(
           backgroundColor: Colors.transparent,

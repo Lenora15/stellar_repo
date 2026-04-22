@@ -73,11 +73,20 @@ class _ClassCardState extends State<ClassCard> {
 
         setState(() => _isLongPressed = true);
       },
+
+      //main card container
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05), 
+          color: Colors.white, 
           borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.5),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
         ),
         child: IntrinsicHeight( 
           child: Row(
@@ -103,7 +112,7 @@ class _ClassCardState extends State<ClassCard> {
                       Text(
                         c.courseName,
                         style: const TextStyle(
-                          color: Colors.white,
+                          color: Colors.black,
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -111,7 +120,7 @@ class _ClassCardState extends State<ClassCard> {
                       const SizedBox(height: 4),
                       Text(
                         "${c.startTime} - ${c.endTime}  |  ${_formatDays(c.daysOfWeek)}  |  Rm ${c.room}",
-                        style: const TextStyle(color: Colors.white54, fontSize: 13),
+                        style: const TextStyle(color: Colors.black, fontSize: 13),
                       ),
                     ],
                   ),

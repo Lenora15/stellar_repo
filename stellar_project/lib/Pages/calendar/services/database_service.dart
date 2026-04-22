@@ -20,13 +20,14 @@ class DatabaseService{
 
   //references to the specific collections in the database that will be working with.
   CollectionReference get _reminderRef => 
-    _db.collection('users').doc(uid).collection('reminders');
+      _db.collection('calendar').doc(uid).collection('reminders');
   
-    CollectionReference get _classRef => 
-    _db.collection('users').doc(uid).collection('classes');
+  CollectionReference get _classRef => 
+      _db.collection('calendar').doc(uid).collection('classes');
 
-      CollectionReference get _eventRef => 
-    _db.collection('users').doc(uid).collection('events');
+  CollectionReference get _eventRef => 
+      _db.collection('calendar').doc(uid).collection('events');
+
 
 
 //-----REMINDER STUFF -----//
@@ -54,8 +55,10 @@ class DatabaseService{
   }
 
   //add new reminder
-  Future<void> addReminder(ReminderModel reminder) async {
-    await _reminderRef.add(reminder.toMap());
+    Future<void> addReminder(ReminderModel reminder) async {
+    Map<String, dynamic> reminderData = reminder.toMap();
+    reminderData['userID'] = uid;
+    await _reminderRef.add(reminderData);
   }
 
   //update existing reminder
@@ -89,8 +92,10 @@ class DatabaseService{
   }
 
   //adds a new class to private classes collection in database
-  Future<void> addClass(ClassModel classModel) async {
-    await _classRef.add(classModel.toMap());
+    Future<void> addClass(ClassModel classModel) async {
+    Map<String, dynamic> classData = classModel.toMap();
+    classData['userID'] = uid;
+    await _classRef.add(classData);
   }
 
     //update existing class
@@ -149,7 +154,9 @@ Future<void> toggleSkipClass(ClassModel classModel, DateTime date) async {
 
   //adds new event to user's private events collection in database
   Future<void> addEvent(EventModel event) async {
-    await _eventRef.add(event.toMap());
+    Map<String, dynamic> eventData = event.toMap();
+    eventData['userID'] = uid;
+    await _eventRef.add(eventData);
   }
 
     //update existing reminder
@@ -161,6 +168,4 @@ Future<void> toggleSkipClass(ClassModel classModel, DateTime date) async {
   Future<void> deleteEvent(String id) async {
     await _eventRef.doc(id).delete();
   }
-
-  
 }

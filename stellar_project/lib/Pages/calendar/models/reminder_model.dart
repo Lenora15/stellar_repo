@@ -1,4 +1,4 @@
-//include: title, isAllDay?, date, time, doesRepeat? isCompleted?
+//include: title, date, time, doesRepeat? isCompleted?
 import 'package:cloud_firestore/cloud_firestore.dart';
 class ReminderModel{
   final String id;

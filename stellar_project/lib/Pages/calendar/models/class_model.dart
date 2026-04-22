@@ -20,7 +20,7 @@ class ClassModel{
     required this.id,
     required this.courseName,
     required this.instructor,
-    required this. room,
+    required this.room,
     required this.daysOfWeek,
     required this.startTime,
     required this.endTime,

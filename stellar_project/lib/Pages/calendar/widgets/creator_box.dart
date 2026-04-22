@@ -6,34 +6,43 @@ import '../models/event_model.dart';
 import '../models/reminder_model.dart';
 import 'time_picker.dart';
 
+//had claude remove all class things, migrating class creation to a different location.
 class CreatorBox extends StatefulWidget {
   final DatabaseService dbService;
   final DateTime initialDate;
+  final String initialMode;
 
-  const CreatorBox({super.key, required this.dbService, required this.initialDate});
+  const CreatorBox({
+    super.key,
+    required this.dbService,
+    required this.initialDate,
+    this.initialMode = 'Event',
+  });
 
   @override
   State<CreatorBox> createState() => _CreatorBoxState();
 }
 
 class _CreatorBoxState extends State<CreatorBox> {
-  bool _isEventMode = true;
+  late String _currentMode;
+
   bool _isAllDay = false;
   int _selectedColor = 0xFF8AB4F8;
 
-
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _noteController = TextEditingController(); 
+  final TextEditingController _noteController = TextEditingController();
   final Color _standardDark = const Color(0xFF2D2E33);
 
   late DateTime _startDate;
   late DateTime _endDate;
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
+  List<int> _selectedReminderMinutes = [10];
 
   @override
   void initState() {
     super.initState();
+    _currentMode = widget.initialMode;
     _startDate = widget.initialDate;
     _endDate = widget.initialDate.add(const Duration(hours: 1));
   }
@@ -48,7 +57,7 @@ class _CreatorBoxState extends State<CreatorBox> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: _standardDark, 
+              primary: _standardDark,
               onPrimary: Colors.white,
               onSurface: _standardDark,
             ),
@@ -70,32 +79,28 @@ class _CreatorBoxState extends State<CreatorBox> {
   }
 
   void _handleSave() async {
-    //handling title for the event. 
     String title = _titleController.text.trim();
     if (title.isEmpty) {
-      title = _isEventMode ? "Untitled Event" : "Untitled Reminder";
+      title = "Untitled $_currentMode";
     }
 
-    DateTime start = DateTime(
-      _startDate.year,
-      _startDate.month,
-      _startDate.day,
-      _startDate.hour,
-      _startDate.minute,
-    );
+    DateTime start = _isAllDay
+        ? DateTime(_startDate.year, _startDate.month, _startDate.day)
+        : DateTime(_startDate.year, _startDate.month, _startDate.day, _startTime.hour, _startTime.minute);
 
-    DateTime end = DateTime(
-      _endDate.year,
-      _endDate.month,
-      _endDate.day,
-      _endDate.hour,
-      _endDate.minute,
-    );
+    DateTime end = _isAllDay
+        ? DateTime(_endDate.year, _endDate.month, _endDate.day)
+        : DateTime(_endDate.year, _endDate.month, _endDate.day, _endTime.hour, _endTime.minute);
 
-    //have to do both reminder and event
-    try{
-      if (_isEventMode) {
-        //handling event creation here
+    if (end.isBefore(start)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('End time cannot be before start time.')),
+      );
+      return;
+    }
+
+    try {
+      if (_currentMode == 'Event') {
         final newEvent = EventModel(
           id: '',
           title: title,
@@ -103,13 +108,12 @@ class _CreatorBoxState extends State<CreatorBox> {
           startDateTime: start,
           endDateTime: end,
           note: _noteController.text.trim(),
-          reminderMinutes: [],
+          reminderMinutes: _selectedReminderMinutes,
           colorValue: _selectedColor,
           isRecurring: false,
         );
         await widget.dbService.addEvent(newEvent);
       } else {
-        //handling reminder creation here
         final newReminder = ReminderModel(
           id: '',
           title: title,
@@ -119,25 +123,27 @@ class _CreatorBoxState extends State<CreatorBox> {
         );
         await widget.dbService.addReminder(newReminder);
       }
-      //close the creator box and show success message
+
       if (mounted) {
-        Navigator.pop(context); 
-        
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isEventMode ? 'Event saved!' : 'Reminder saved!'), duration: const Duration(seconds: 1)),
+        final messenger = ScaffoldMessenger.of(context);
+        Navigator.pop(context);
+        messenger.showSnackBar(
+          SnackBar(
+            content: Text('$_currentMode saved!'),
+            duration: const Duration(seconds: 1),
+          ),
         );
       }
     } catch (e) {
-      //error handling
       print("Error saving: $e");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to save ${_isEventMode ? 'event' : 'reminder'}. Please try again.'))
+          SnackBar(content: Text('Failed to save $_currentMode. Please try again.')),
         );
       }
     }
   }
-  //building the UI for the creator box
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -149,7 +155,7 @@ class _CreatorBoxState extends State<CreatorBox> {
               filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white, 
+                  color: Colors.white,
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
                   border: Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1.5),
                 ),
@@ -158,14 +164,16 @@ class _CreatorBoxState extends State<CreatorBox> {
           ),
         ),
 
-        //actual content of the creator box
         Column(
           children: [
             Container(
               margin: const EdgeInsets.only(top: 12),
               height: 5,
               width: 40,
-              decoration: BoxDecoration(color: _standardDark, borderRadius: BorderRadius.circular(10)),
+              decoration: BoxDecoration(
+                color: _standardDark,
+                borderRadius: BorderRadius.circular(10),
+              ),
             ),
 
             Padding(
@@ -177,47 +185,109 @@ class _CreatorBoxState extends State<CreatorBox> {
               child: ListView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 children: [
-
                   TextField(
                     controller: _titleController,
-                    style: TextStyle(color: _standardDark, fontSize: 32, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      color: _standardDark,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w600,
+                    ),
                     decoration: InputDecoration(
-                      hintText: _isEventMode ? "Title" : "Title",
+                      hintText: "Title",
                       hintStyle: TextStyle(color: _standardDark.withValues(alpha: 0.2)),
                       border: InputBorder.none,
                     ),
                   ),
-                  
+
                   Divider(color: _standardDark.withValues(alpha: 0.1), height: 32),
-                  
-                  if (_isEventMode)
+
+                  if (_currentMode == 'Event') ...[
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: Text("All day", style: TextStyle(color: _standardDark, fontSize: 16, fontWeight: FontWeight.w500)),
+                      title: Text(
+                        "All day",
+                        style: TextStyle(
+                          color: _standardDark,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
                       value: _isAllDay,
                       activeColor: Colors.deepPurpleAccent,
                       onChanged: (val) => setState(() => _isAllDay = val),
                     ),
-
-                  //date and time pickers
-                  _buildDateTimeRow(true),
-                  if (_isEventMode) ...[
+                    _buildDateTimeRow(true),
                     const SizedBox(height: 16),
                     _buildDateTimeRow(false),
-                  ],
-
-                  const SizedBox(height: 30),
-
-
-                  if (_isEventMode) ...[
-                    Text("Color", style: TextStyle(color: _standardDark.withValues(alpha: 0.5), fontWeight: FontWeight.bold, fontSize: 13)),
+                    const SizedBox(height: 30),
+                    Text(
+                      "Color",
+                      style: TextStyle(
+                        color: _standardDark.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
                     const SizedBox(height: 15),
                     _buildColorRow(),
+                    const SizedBox(height: 30),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: DropdownButtonFormField<int>(
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.notifications, color: Colors.black54),
+                          labelText: 'Alert',
+                          filled: true,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                        dropdownColor: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        value: _selectedReminderMinutes.isNotEmpty
+                            ? _selectedReminderMinutes.first
+                            : null,
+                        items: const [
+                          DropdownMenuItem(value: 0, child: Text('At time of event')),
+                          DropdownMenuItem(value: 5, child: Text('5 minutes before')),
+                          DropdownMenuItem(value: 10, child: Text('10 minutes before')),
+                          DropdownMenuItem(value: 30, child: Text('30 minutes before')),
+                          DropdownMenuItem(value: 60, child: Text('1 hour before')),
+                          DropdownMenuItem(value: 1440, child: Text('1 day before')),
+                        ],
+                        onChanged: (int? newValue) {
+                          if (newValue != null) {
+                            setState(() {
+                              _selectedReminderMinutes = [newValue];
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                      child: TextField(
+                        controller: _noteController,
+                        maxLines: 3,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.notes, color: Colors.black54),
+                          hintText: 'Add note...',
+                          hintStyle: TextStyle(color: _standardDark.withValues(alpha: 0.4)),
+                          filled: true,
+                          fillColor: Colors.black.withValues(alpha: 0.05),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide.none,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
 
-                  const SizedBox(height: 30),
-                  _buildMetadataTile(Icons.notifications_none_outlined, "Alert"),
-                  _buildMetadataTile(Icons.notes_outlined, "Notes"),
+                  if (_currentMode == 'Reminder') ...[
+                    _buildDateTimeRow(true),
+                  ],
                 ],
               ),
             ),
@@ -229,16 +299,18 @@ class _CreatorBoxState extends State<CreatorBox> {
     );
   }
 
-  //switch between event and reminder creation modes
   Widget _buildStellarToggle() {
     return Container(
       padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(color: Colors.black.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(15)),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(15),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _toggleBtn("Event", _isEventMode),
-          _toggleBtn("Reminder", !_isEventMode),
+          _toggleBtn("Event", _currentMode == 'Event'),
+          _toggleBtn("Reminder", _currentMode == 'Reminder'),
         ],
       ),
     );
@@ -246,15 +318,23 @@ class _CreatorBoxState extends State<CreatorBox> {
 
   Widget _toggleBtn(String label, bool active) {
     return GestureDetector(
-      onTap: () => setState(() => _isEventMode = label == "Event"),
+      onTap: () => setState(() => _currentMode = label),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         decoration: BoxDecoration(
           color: active ? Colors.white : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
-          boxShadow: active ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)] : [],
+          boxShadow: active
+              ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)]
+              : [],
         ),
-        child: Text(label, style: TextStyle(color: active ? _standardDark : _standardDark.withValues(alpha: 0.4), fontWeight: FontWeight.bold)),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: active ? _standardDark : _standardDark.withValues(alpha: 0.4),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
     );
   }
@@ -267,18 +347,20 @@ class _CreatorBoxState extends State<CreatorBox> {
       children: [
         Icon(Icons.calendar_today, color: _standardDark.withValues(alpha: 0.6), size: 20),
         const SizedBox(width: 15),
-        
 
         GestureDetector(
           onTap: () => _selectDate(isStart),
           child: Text(
             DateFormat('EEE, MMM d').format(date),
-            style: TextStyle(color: _standardDark, fontSize: 17, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: _standardDark,
+              fontSize: 17,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
-        
-        const Spacer(),
 
+        const Spacer(),
 
         if (!_isAllDay)
           GestureDetector(
@@ -294,12 +376,16 @@ class _CreatorBoxState extends State<CreatorBox> {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.05),
+                color: Colors.black.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
                 time.format(context),
-                style: TextStyle(color: _standardDark, fontSize: 17, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: _standardDark,
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
           ),
@@ -321,20 +407,13 @@ class _CreatorBoxState extends State<CreatorBox> {
             decoration: BoxDecoration(
               color: Color(c),
               shape: BoxShape.circle,
-              border: sel ? Border.all(color: _standardDark.withValues(alpha: 0.3), width: 3) : null,
+              border: sel
+                  ? Border.all(color: _standardDark.withValues(alpha: 0.3), width: 3)
+                  : null,
             ),
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildMetadataTile(IconData icon, String label) {
-    return ListTile(
-      contentPadding: EdgeInsets.zero,
-      leading: Icon(icon, color: _standardDark.withValues(alpha: 0.4)),
-      title: Text(label, style: TextStyle(color: _standardDark.withValues(alpha: 0.6), fontSize: 16)),
-      trailing: Icon(Icons.chevron_right, color: _standardDark.withValues(alpha: 0.2)),
     );
   }
 
@@ -346,7 +425,13 @@ class _CreatorBoxState extends State<CreatorBox> {
           Expanded(
             child: TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Cancel", style: TextStyle(color: _standardDark.withValues(alpha: 0.6), fontSize: 16)),
+              child: Text(
+                "Cancel",
+                style: TextStyle(
+                  color: _standardDark.withValues(alpha: 0.6),
+                  fontSize: 16,
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 20),
@@ -355,8 +440,20 @@ class _CreatorBoxState extends State<CreatorBox> {
               onTap: _handleSave,
               child: Container(
                 height: 55,
-                decoration: BoxDecoration(color: _standardDark, borderRadius: BorderRadius.circular(15)),
-                child: const Center(child: Text("Save", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16))),
+                decoration: BoxDecoration(
+                  color: _standardDark,
+                  borderRadius: BorderRadius.circular(15),
+                ),
+                child: const Center(
+                  child: Text(
+                    "Save",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
