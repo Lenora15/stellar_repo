@@ -11,12 +11,16 @@ class CreatorBox extends StatefulWidget {
   final DatabaseService dbService;
   final DateTime initialDate;
   final String initialMode;
+    final EventModel? existingEvent;
+  final ReminderModel? existingReminder;
 
   const CreatorBox({
     super.key,
     required this.dbService,
     required this.initialDate,
     this.initialMode = 'Event',
+    this.existingEvent,
+    this.existingReminder
   });
 
   @override
@@ -39,15 +43,33 @@ class _CreatorBoxState extends State<CreatorBox> {
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
   List<int> _selectedReminderMinutes = [10];
 
-  @override
+   @override
   void initState() {
     super.initState();
-    _currentMode = widget.initialMode;
+    _currentMode = widget.existingReminder != null ? 'Reminder' : widget.initialMode;
     _startDate = widget.initialDate;
     _endDate = widget.initialDate.add(const Duration(hours: 1));
+ 
+    if (widget.existingEvent != null) {
+      final e = widget.existingEvent!;
+      _titleController.text = e.title;
+      _noteController.text = e.note;
+      _isAllDay = e.isAllDay;
+      _selectedColor = e.colorValue;
+      _startDate = e.startDateTime;
+      _endDate = e.endDateTime;
+      _startTime = TimeOfDay(hour: e.startDateTime.hour, minute: e.startDateTime.minute);
+      _endTime = TimeOfDay(hour: e.endDateTime.hour, minute: e.endDateTime.minute);
+      _selectedReminderMinutes = List.from(e.reminderMinutes);
+    } else if (widget.existingReminder != null) {
+      final r = widget.existingReminder!;
+      _titleController.text = r.title;
+      _startDate = r.dateTime;
+      _startTime = TimeOfDay(hour: r.dateTime.hour, minute: r.dateTime.minute);
+    }
   }
 
-  Future<void> _selectDate(bool isStart) async {
+    Future<void> _selectDate(bool isStart) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: isStart ? _startDate : _endDate,
@@ -78,31 +100,32 @@ class _CreatorBoxState extends State<CreatorBox> {
     }
   }
 
+   
   void _handleSave() async {
     String title = _titleController.text.trim();
     if (title.isEmpty) {
       title = "Untitled $_currentMode";
     }
-
+ 
     DateTime start = _isAllDay
         ? DateTime(_startDate.year, _startDate.month, _startDate.day)
         : DateTime(_startDate.year, _startDate.month, _startDate.day, _startTime.hour, _startTime.minute);
-
+ 
     DateTime end = _isAllDay
         ? DateTime(_endDate.year, _endDate.month, _endDate.day)
         : DateTime(_endDate.year, _endDate.month, _endDate.day, _endTime.hour, _endTime.minute);
-
+ 
     if (end.isBefore(start)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('End time cannot be before start time.')),
       );
       return;
     }
-
+ 
     try {
       if (_currentMode == 'Event') {
         final newEvent = EventModel(
-          id: '',
+          id: widget.existingEvent?.id ?? '',
           title: title,
           isAllDay: _isAllDay,
           startDateTime: start,
@@ -110,20 +133,33 @@ class _CreatorBoxState extends State<CreatorBox> {
           note: _noteController.text.trim(),
           reminderMinutes: _selectedReminderMinutes,
           colorValue: _selectedColor,
-          isRecurring: false,
+          isRecurring: widget.existingEvent?.isRecurring ?? false,
+          frequency: widget.existingEvent?.frequency ?? 'none',
+          interval: widget.existingEvent?.interval ?? 1,
+          repeatDays: widget.existingEvent?.repeatDays ?? [],
+          endDate: widget.existingEvent?.endDate,
+          skippedDates: widget.existingEvent?.skippedDates ?? [],
         );
-        await widget.dbService.addEvent(newEvent);
+        if (widget.existingEvent != null) {
+          await widget.dbService.updateEvent(newEvent);
+        } else {
+          await widget.dbService.addEvent(newEvent);
+        }
       } else {
         final newReminder = ReminderModel(
-          id: '',
+          id: widget.existingReminder?.id ?? '',
           title: title,
           dateTime: start,
-          isCompleted: false,
-          recurrence: null,
+          isCompleted: widget.existingReminder?.isCompleted ?? false,
+          recurrence: widget.existingReminder?.recurrence,
         );
-        await widget.dbService.addReminder(newReminder);
+        if (widget.existingReminder != null) {
+          await widget.dbService.updateReminder(newReminder);
+        } else {
+          await widget.dbService.addReminder(newReminder);
+        }
       }
-
+ 
       if (mounted) {
         final messenger = ScaffoldMessenger.of(context);
         Navigator.pop(context);
@@ -171,7 +207,7 @@ class _CreatorBoxState extends State<CreatorBox> {
               height: 5,
               width: 40,
               decoration: BoxDecoration(
-                color: _standardDark,
+                color: Colors.white30,
                 borderRadius: BorderRadius.circular(10),
               ),
             ),
@@ -223,7 +259,7 @@ class _CreatorBoxState extends State<CreatorBox> {
                     Text(
                       "Color",
                       style: TextStyle(
-                        color: _standardDark.withValues(alpha: 0.5),
+                        color: Colors.black,
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
                       ),
@@ -232,37 +268,51 @@ class _CreatorBoxState extends State<CreatorBox> {
                     _buildColorRow(),
                     const SizedBox(height: 30),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-                      child: DropdownButtonFormField<int>(
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.notifications, color: Colors.black54),
-                          labelText: 'Alert',
-                          filled: true,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide.none,
+                      padding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Reminder",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
                           ),
-                        ),
-                        dropdownColor: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        value: _selectedReminderMinutes.isNotEmpty
-                            ? _selectedReminderMinutes.first
-                            : null,
-                        items: const [
-                          DropdownMenuItem(value: 0, child: Text('At time of event')),
-                          DropdownMenuItem(value: 5, child: Text('5 minutes before')),
-                          DropdownMenuItem(value: 10, child: Text('10 minutes before')),
-                          DropdownMenuItem(value: 30, child: Text('30 minutes before')),
-                          DropdownMenuItem(value: 60, child: Text('1 hour before')),
-                          DropdownMenuItem(value: 1440, child: Text('1 day before')),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<int>(
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.notifications, color: Colors.grey),
+                              filled: true,
+                              fillColor: Colors.black.withValues(alpha: 0.05),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            dropdownColor: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            value: _selectedReminderMinutes.isNotEmpty
+                                ? _selectedReminderMinutes.first
+                                : null,
+                            items: const [
+                              DropdownMenuItem(value: 0, child: Text('At time of event', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 5, child: Text('5 minutes before', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 10, child: Text('10 minutes before', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 30, child: Text('30 minutes before', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 60, child: Text('1 hour before', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 1440, child: Text('1 day before', style: TextStyle(color: Colors.black))),
+                            ],
+                            onChanged: (int? newValue) {
+                              if (newValue != null) {
+                                setState(() {
+                                  _selectedReminderMinutes = [newValue];
+                                });
+                              }
+                            },
+                          ),
                         ],
-                        onChanged: (int? newValue) {
-                          if (newValue != null) {
-                            setState(() {
-                              _selectedReminderMinutes = [newValue];
-                            });
-                          }
-                        },
                       ),
                     ),
                     Padding(

@@ -4,10 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 import 'services/database_service.dart';
-import 'models/event_model.dart';
-import 'models/class_model.dart';
-import 'models/reminder_model.dart';
-
 
 import 'year_view.dart';
 import 'month_week_view.dart';
@@ -15,9 +11,10 @@ import 'day_view.dart';
 
 import 'calendar_drawer.dart';
 import 'widgets/creator_box.dart';
-import 'widgets/event_item.dart';
 
-enum CalendarView { year, month, week, day }
+//had claude remove some redundencies
+
+enum CalendarView { year, month, week, day, reminders }
 
 class CalendarHost extends StatefulWidget {
   const CalendarHost({super.key});
@@ -28,11 +25,10 @@ class CalendarHost extends StatefulWidget {
 
 class _CalendarHostState extends State<CalendarHost> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
-  CalendarView _currentView = CalendarView.month; 
+
+  CalendarView _currentView = CalendarView.month;
   DateTime _focusedDay = DateTime.now();
-  DateTime _selectedDay = DateTime.now();
-  bool _showSchedule = true; 
+  bool _showSchedule = true;
 
   late DatabaseService _dbService;
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
@@ -54,21 +50,23 @@ class _CalendarHostState extends State<CalendarHost> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, 
+      backgroundColor: Colors.transparent,
       builder: (context) {
         return ClipRRect(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 15.0, sigmaY: 15.0),
             child: Container(
-              height: MediaQuery.of(context).size.height * 0.85, 
+              height: MediaQuery.of(context).size.height * 0.85,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.5), 
-                border: Border(top: BorderSide(color: Colors.white.withOpacity(0.3), width: 1.5)),
+                color: Colors.black.withValues(alpha: 0.5),
+                border: Border(
+                    top: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.3), width: 1.5)),
               ),
               child: CreatorBox(
                 dbService: _dbService,
-                initialDate: _selectedDay,
+                initialDate: _focusedDay,
               ),
             ),
           ),
@@ -77,182 +75,110 @@ class _CalendarHostState extends State<CalendarHost> {
     );
   }
 
-
-  Widget _buildCurrentView() {
-    switch (_currentView) {
-      case CalendarView.year:
-        return YearView(focusedDay: _focusedDay);
-      case CalendarView.day:
-        return DayView(focusedDay: _focusedDay);
-      case CalendarView.month:
-      case CalendarView.week:
-      default:
-        return MonthWeekView(
-          focusedDay: _focusedDay,
-          isWeekFormat: _currentView == CalendarView.week,
-          showSchedule: _showSchedule,
-          onPageChanged: (newDate) {
-            setState(() {
-              _focusedDay = newDate;
-              _selectedDay = newDate;
-            });
-          },
-        );
-    }
+Widget _buildCurrentView() {
+  switch (_currentView) {
+    case CalendarView.year:
+      return YearView(focusedDay: _focusedDay);
+    case CalendarView.day:
+      return DayView(
+        focusedDay: _focusedDay,
+        onDayChanged: (newDate) {
+          setState(() => _focusedDay = newDate);
+        },
+      );
+    case CalendarView.month:
+      return MonthWeekView(
+        focusedDay: _focusedDay,
+        showSchedule: _showSchedule,
+        onPageChanged: (newDate) {
+          setState(() => _focusedDay = newDate);
+        },
+      );
+    case CalendarView.week:
+      return MonthWeekView(
+        focusedDay: _focusedDay,
+        showSchedule: _showSchedule,
+        locked: true,
+        onPageChanged: (newDate) {
+          setState(() => _focusedDay = newDate);
+        },
+      );
+    case CalendarView.reminders:
+      return MonthWeekView(
+        focusedDay: _focusedDay,
+        showSchedule: false,
+        locked: true,
+        remindersOnly: true,
+        onPageChanged: (newDate) {
+          setState(() => _focusedDay = newDate);
+        },
+      );
   }
+}
 
-  @override
+   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
       backgroundColor: Colors.transparent,
-      
+
       drawer: CalendarDrawer(
         currentView: _currentView,
         onViewChanged: _changeView,
         showSchedule: _showSchedule,
         onScheduleToggle: (val) => setState(() => _showSchedule = val),
       ),
-      
+
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 10.0),
-                  child: Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.menu, size: 28, color: Colors.white),
-                        onPressed: () => _scaffoldKey.currentState?.openDrawer(),
-                      ),
-                      Expanded(
-                        child: Center(
-                          child: Text(
-                            DateFormat('MMMM').format(_focusedDay).toUpperCase(),
-                            style: const TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.w300,
-                              letterSpacing: 4.0,
-                              color: Colors.white,
-                            ),
-                          ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10.0),
+              child: Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.menu, size: 28, color: Colors.white),
+                    onPressed: () => _scaffoldKey.currentState?.openDrawer(),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        '${DateFormat('MMMM').format(_focusedDay).toUpperCase()}  ${_focusedDay.year}',
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w300,
+                          letterSpacing: 4.0,
+                          color: Colors.white,
                         ),
-                      ),
-                      const SizedBox(width: 48), 
-                    ],
-                  ),
-                ),
-
-                Expanded(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: _buildCurrentView(),
-                  ),
-                ),
-                
-                if (_currentView == CalendarView.month || _currentView == CalendarView.week)
-                  const SizedBox(height: 140), 
-              ],
-            ),
-
-
-            if (_currentView == CalendarView.month || _currentView == CalendarView.week)
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-                  child: BackdropFilter(
-                    filter: ImageFilter.blur(sigmaX: 12.0, sigmaY: 12.0),
-                    child: Container(
-                      height: 160, 
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.08),
-                        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.2), width: 1)),
-                      ),
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.symmetric(vertical: 12),
-                            height: 4,
-                            width: 40,
-                            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(10)),
-                          ),
-                          
-                          Expanded(
-                            child: StreamBuilder<List<EventModel>>(
-                              stream: _dbService.allEvents,
-                              builder: (context, eventSnapshot) {
-                                return StreamBuilder<List<ReminderModel>>(
-                                  stream: _dbService.allReminders,
-                                  builder: (context, reminderSnapshot) {
-                                    return StreamBuilder<List<ClassModel>>(
-                                      stream: _dbService.allClasses,
-                                      builder: (context, classSnapshot) {
-                                        List<dynamic> combinedList = [];
-                                        
-                                        if (eventSnapshot.hasData) {
-                                          combinedList.addAll(eventSnapshot.data!.where((e) => 
-                                            e.startDateTime.year == _selectedDay.year &&
-                                            e.startDateTime.month == _selectedDay.month &&
-                                            e.startDateTime.day == _selectedDay.day));
-                                        }
-                                        
-                                        if (reminderSnapshot.hasData) {
-                                          combinedList.addAll(reminderSnapshot.data!.where((r) => 
-                                            r.dateTime.year == _selectedDay.year &&
-                                            r.dateTime.month == _selectedDay.month &&
-                                            r.dateTime.day == _selectedDay.day));
-                                        }
-
-                                        if (_showSchedule && classSnapshot.hasData) {
-                                          combinedList.addAll(classSnapshot.data!.where((c) => 
-                                            c.daysOfWeek.contains(_selectedDay.weekday)));
-                                        }
-
-                                        if (combinedList.isEmpty) {
-                                          return const Center(child: Text("No items for today", style: TextStyle(color: Colors.white38)));
-                                        }
-
-                                        return ListView.builder(
-                                          itemCount: combinedList.length,
-                                          itemBuilder: (context, index) {
-                                            return EventItem(
-                                              item: combinedList[index], 
-                                              dbService: _dbService,
-                                              selectedDate: _selectedDay,
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ],
                       ),
                     ),
                   ),
-                ),
+                  const SizedBox(width: 48),
+                ],
               ),
+            ),
+
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: _buildCurrentView(),
+              ),
+            ),
           ],
         ),
       ),
 
       floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 70.0), 
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 10),
         child: FloatingActionButton(
-          onPressed: _showCreatorBox, 
-          backgroundColor: Colors.blueAccent,
+          onPressed: _showCreatorBox,
+          backgroundColor: Colors.white.withValues(alpha: 0.5),
           elevation: 4,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

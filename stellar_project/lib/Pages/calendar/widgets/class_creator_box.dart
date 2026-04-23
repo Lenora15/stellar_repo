@@ -6,7 +6,6 @@ import '../models/class_model.dart';
 
 class ClassCreatorBox extends StatefulWidget {
   final DatabaseService dbService;
-  // 1. ADDED: An optional parameter to hold existing class data
   final ClassModel? existingClass; 
 
   const ClassCreatorBox({super.key, required this.dbService, this.existingClass});
@@ -30,7 +29,6 @@ class _ClassCreatorBoxState extends State<ClassCreatorBox> {
   @override
   void initState() {
     super.initState();
-    // 2. THE MAGIC PRE-FILL: If an existing class was passed in, populate the UI
     if (widget.existingClass != null) {
       final oldClass = widget.existingClass!;
       
@@ -40,19 +38,17 @@ class _ClassCreatorBoxState extends State<ClassCreatorBox> {
       _selectedDaysOfWeek = List.from(oldClass.daysOfWeek);
       _selectedColor = oldClass.colorValue;
       
-      // Convert the string times (e.g., "9:00 AM") back into TimeOfDay objects
       _startTime = _parseTimeString(oldClass.startTime);
       _endTime = _parseTimeString(oldClass.endTime);
     }
   }
 
-  // Helper method to convert the saved time strings back to UI TimeOfDay
   TimeOfDay _parseTimeString(String timeString) {
     try {
       final dateTime = DateFormat('h:mm a').parse(timeString);
       return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
     } catch (e) {
-      return const TimeOfDay(hour: 9, minute: 0); // Safe fallback
+      return const TimeOfDay(hour: 9, minute: 0);
     }
   }
 
@@ -69,7 +65,6 @@ class _ClassCreatorBoxState extends State<ClassCreatorBox> {
     DateTime end = DateTime(today.year, today.month, today.day, _endTime.hour, _endTime.minute);
 
     try {
-      // 3. PACKAGE THE DATA: Preserve the original ID, Skipped Days, and Position!
       final classData = ClassModel(
         id: widget.existingClass?.id ?? '', 
         courseName: _titleController.text.trim(),
@@ -83,7 +78,6 @@ class _ClassCreatorBoxState extends State<ClassCreatorBox> {
         position: widget.existingClass?.position ?? 0,
       );
       
-      // 4. ROUTE THE SAVE: Update if it exists, Add if it's new
       if (widget.existingClass != null) {
         await widget.dbService.updateClass(classData);
       } else {

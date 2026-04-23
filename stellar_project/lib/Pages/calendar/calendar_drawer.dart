@@ -4,7 +4,6 @@ import 'calendar_host.dart';
 import 'services/database_service.dart';
 import 'models/class_model.dart';
 import 'widgets/class_card.dart';
-import 'widgets/creator_box.dart';
 import 'widgets/class_creator_box.dart';
 import 'package:dotted_line/dotted_line.dart';
 
@@ -29,7 +28,7 @@ class CalendarDrawer extends StatefulWidget {
 class _CalendarDrawerState extends State<CalendarDrawer> {
   late DatabaseService _dbService;
   final String _uid = FirebaseAuth.instance.currentUser!.uid;
-  bool _isEditMode = false; // Toggle for edit mode (add/remove classes)
+  bool _isEditMode = false;
   @override
   void initState() {
     super.initState();
@@ -90,10 +89,7 @@ class _CalendarDrawerState extends State<CalendarDrawer> {
             ListTile(
               leading: const Icon(Icons.check_circle_outline, color: Colors.black),
               title: const Text("Reminders", style: TextStyle(color: Colors.black)),
-              onTap: () {
-                Navigator.pop(context);
-                //Need to add reminders calendar view still
-              },
+              onTap: () => widget.onViewChanged(CalendarView.reminders),
             ),
 
             //separates views from schedule section of the drawer
@@ -123,7 +119,7 @@ class _CalendarDrawerState extends State<CalendarDrawer> {
                         Navigator.pop(context);
                         showDialog(
                           context: context,
-                          builder: (context) => ClassCreatorBox(dbService: _dbService), // Uses the new, dedicated file!
+                          builder: (context) => ClassCreatorBox(dbService: _dbService),
                         );
                       },
                     ),
@@ -164,6 +160,12 @@ class _CalendarDrawerState extends State<CalendarDrawer> {
                   if (_isEditMode) {
                     return ReorderableListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      proxyDecorator: (child, index, animation,){
+                        return Material(
+                          color: Colors.transparent,
+                          child: child,
+                        );
+                      },
                       itemCount: classes.length,
                       onReorder: (oldIndex, newIndex) {
                         if (newIndex > oldIndex) newIndex -= 1;
@@ -210,7 +212,10 @@ class _CalendarDrawerState extends State<CalendarDrawer> {
                                   );
                                 },
                               ),
-                              const Icon(Icons.drag_handle, color: Colors.black26),
+                              ReorderableDragStartListener(
+                                index: index,
+                                child: const Icon(Icons.drag_handle, color: Colors.grey),
+                              ),
                               const SizedBox(width: 8),
                             ]
                           )
@@ -219,7 +224,7 @@ class _CalendarDrawerState extends State<CalendarDrawer> {
 
                     );
                   }
-                  // view mode
+                  //view mode
                   else {
                     return ListView.builder(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
