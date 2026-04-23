@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home.dart';
 import 'calendar/calendar_host.dart';
-import 'chat.dart';
+import 'chat/chat.dart';
 import 'notes.dart';
 import 'profile.dart';
 
