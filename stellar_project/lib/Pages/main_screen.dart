@@ -14,28 +14,27 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  
-  static const List<Widget> _widgetOptions = <Widget>[
-    HomeContent(),
-    CalendarHost(),
-    ChatPage(),
-    NotesPage(),
-    ProfilePage(),
-  ];
-
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
+    final pages = <Widget>[
+      HomeContent(onViewCalendar: () => _onItemTapped(1)),
+      const CalendarHost(),
+      const ChatPage(),
+      const NotesPage(),
+      const ProfilePage(),
+    ];
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       extendBody: true,
-      body: Center(child: _widgetOptions.elementAt(_selectedIndex)),
+      body: Center(child: pages[_selectedIndex]),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: Color(0xFF21263B),

@@ -7,6 +7,7 @@ import 'themes/app_themes.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'notification_service.dart';
 
 
 void main() async {
@@ -14,6 +15,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationService.init();
   runApp(const MyApp());
 }
 

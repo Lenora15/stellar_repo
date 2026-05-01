@@ -97,7 +97,6 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Search bar
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
               child: Container(
@@ -119,7 +118,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
-            // New Chat button
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 4),
               child: GestureDetector(
@@ -149,7 +147,6 @@ class _ChatPageState extends State<ChatPage> {
               ),
             ),
 
-            // Conversation list
             Expanded(
               child: StreamBuilder<List<ConversationModel>>(
                 stream: _service.conversations,
@@ -250,7 +247,6 @@ class _ChatPageState extends State<ChatPage> {
         ),
         child: Row(
           children: [
-            // Icon badge
             Container(
               width: 42,
               height: 42,
@@ -262,7 +258,6 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: 14),
 
-            // Title + preview
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,7 +289,6 @@ class _ChatPageState extends State<ChatPage> {
             ),
             const SizedBox(width: 8),
 
-            // Timestamp + chevron
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [

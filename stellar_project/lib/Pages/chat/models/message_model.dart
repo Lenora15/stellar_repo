@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MessageModel {
   final String id;
-  final String role; // 'user' or 'model'
+  final String role;
   final String content;
   final DateTime timestamp;
 

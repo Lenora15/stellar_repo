@@ -29,7 +29,6 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
   String _streamingContent = '';
   ChatSession? _session;
 
-  // Tracks current title so it can update live after first message
   late String _currentTitle;
   bool _titleSet = false;
 
@@ -44,11 +43,9 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
   }
 
   Future<void> _initialize() async {
-    // Load existing messages first so history is passed to the AI session
     final messages = await _service.getMessages(widget.conversationId).first;
     final model = await _service.buildModel();
 
-    // Rebuild Vertex AI chat history from stored messages
     final history = messages.map((m) {
       if (m.role == 'user') return Content.text(m.content);
       return Content('model', [TextPart(m.content)]);
@@ -77,7 +74,6 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
     });
     _scrollToBottom();
 
-    // Auto-title the conversation from the first user message
     if (!_titleSet) {
       _titleSet = true;
       final newTitle = text.length > 45 ? '${text.substring(0, 45)}...' : text;
@@ -328,7 +324,7 @@ class _ChatConversationPageState extends State<ChatConversationPage> {
 
   Widget _buildInputBar(ColorScheme colorScheme) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 10, 16, 28),
+      padding: EdgeInsets.fromLTRB(16, 10, 16, MediaQuery.of(context).padding.bottom + 10),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.25),
       ),

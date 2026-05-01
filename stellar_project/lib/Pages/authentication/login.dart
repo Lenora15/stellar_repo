@@ -12,10 +12,13 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+
+  //text editing controllers manage imputted text
   final TextEditingController _identifierController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final AuthService _authService = AuthService();
 
+  //building ui
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,6 +32,8 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   children: [
                     const SizedBox(height: 60),
+
+                    //Title
                     const Text(
                       'Stellar',
                       style: TextStyle(
@@ -39,6 +44,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     const SizedBox(height: 40),
+
+                    //contains blur
                     ClipRRect(
                       borderRadius: BorderRadius.circular(30),
                       child: BackdropFilter(
@@ -52,20 +59,29 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           child: Column(
                             children: [
+
+                              //Username and email input
                               _buildInput(_identifierController, 'Username or Email', Icons.person_outline),
                               const SizedBox(height: 15),
+
+                              //password input
                               _buildInput(_passwordController, 'Password', Icons.lock_outline, obscure: true),
                               
+                              //forgot password button
                               Align(
                                 alignment: Alignment.centerRight,
                                 child: TextButton(
                                   onPressed: () async {
+
+                                    //check for empty or @
                                     if (_identifierController.text.isEmpty || !_identifierController.text.contains('@')) {
                                       ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(content: Text('Please enter a valid email to reset your password.')),
                                       );
                                       return;
                                     }
+
+                                    //send password reset email through firebase
                                     try {
                                       await _authService.resetPassword(email: _identifierController.text.trim());
                                       ScaffoldMessenger.of(context).showSnackBar(
@@ -83,7 +99,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
 
                               const SizedBox(height: 10),
-
+                              
+                              //Main login button
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color.fromARGB(255, 39, 45, 57),
@@ -91,10 +108,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                                 ),
                                 onPressed: () async {
+
+                                  //call the hybrid login which accepts both username and email
                                   String? result = await _authService.hybridLogin(
                                     identifier: _identifierController.text.trim(),
                                     password: _passwordController.text,
                                   );
+
+                                  //safety check that makes sure widget is still displaying before navigation
                                   if (!mounted) return;
                                   if (result == 'Success') {
                                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MainScreen()));
@@ -111,6 +132,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
 
                     const SizedBox(height: 30),
+
+                    //nav to signup
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -131,6 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
+  //used to avoid redundancy
   Widget _buildInput(TextEditingController controller, String hint, IconData icon, {bool obscure = false}) {
     return TextField(
       controller: controller,

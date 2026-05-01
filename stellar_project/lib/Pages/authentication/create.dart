@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'firebase_auth.dart';
 
+
 class CreateAccount extends StatefulWidget {
   const CreateAccount({super.key});
 
@@ -12,14 +13,18 @@ class CreateAccount extends StatefulWidget {
 class _CreateAccountState extends State<CreateAccount> {
   final AuthService _authService = AuthService();
   
+  // text editing controllers
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
+
+  //storing the user's birthday. initially null
   DateTime? _selectedDate;
 
+  //opening calendar dialog
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -32,6 +37,7 @@ class _CreateAccountState extends State<CreateAccount> {
     }
   }
 
+  //preventing repeating styling code
   Widget _buildTextField(TextEditingController controller, String hint, IconData icon, {bool obscure = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -55,6 +61,7 @@ class _CreateAccountState extends State<CreateAccount> {
     );
   }
 
+//building the UI
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +73,8 @@ class _CreateAccountState extends State<CreateAccount> {
             child: Column(
               children: [
                 const SizedBox(height: 50),
+
+                //Main title
                 const Text(
                   "Stellar",
                   style: TextStyle(
@@ -77,6 +86,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 ),
                 const SizedBox(height: 30),
 
+                //contains blur
                 ClipRRect(
                   borderRadius: BorderRadius.circular(25),
                   child: BackdropFilter(
@@ -99,6 +109,8 @@ class _CreateAccountState extends State<CreateAccount> {
                             ),
                           ),
                           const SizedBox(height: 20),
+
+                          //uses helper function to build input fields
                           _buildTextField(_firstNameController, 'First Name', Icons.person_outline),
                           _buildTextField(_lastNameController, 'Last Name', Icons.person_outline),
                           _buildTextField(_usernameController, 'Choose a username', Icons.account_circle_outlined),
@@ -107,6 +119,8 @@ class _CreateAccountState extends State<CreateAccount> {
                           _buildTextField(_phoneController, 'Phone Number', Icons.phone_outlined),
                           
                           const SizedBox(height: 8),
+
+                          //trigger date picker
                           GestureDetector(
                             onTap: () => _selectDate(context),
                             child: Container(
@@ -120,6 +134,8 @@ class _CreateAccountState extends State<CreateAccount> {
                                   const Icon(Icons.calendar_today_outlined, color: Colors.black54),
                                   const SizedBox(width: 12),
                                   Text(
+
+                                    //date display --> needs fixed. doesnt display selected date
                                     _selectedDate == null 
                                       ? 'Select Birthdate' 
                                       : 'DOB: ${_selectedDate!.toLocal()}'.split(' ')[0],
@@ -132,6 +148,7 @@ class _CreateAccountState extends State<CreateAccount> {
 
                           const SizedBox(height: 30),
                           
+                          //sign up
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Color.fromARGB(255, 39, 45, 57),
@@ -141,6 +158,8 @@ class _CreateAccountState extends State<CreateAccount> {
                               elevation: 0,
                             ),
                             onPressed: () async {
+
+                                //makes sure email and password fields arent empty
                                 if (_emailController.text.isEmpty || _passwordController.text.isEmpty) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Email and Password are required.')),
@@ -148,12 +167,15 @@ class _CreateAccountState extends State<CreateAccount> {
                                   return;
                                 }
 
+                                //makes sure date is selected
                                 if (_selectedDate == null) {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(content: Text('Please select your birthdate.')),
                                   );
                                   return;
                                 }
+
+                                //send data to auth service
                                 String? result = await _authService.registration(
                                   email: _emailController.text.trim(),
                                   password: _passwordController.text.trim(),
@@ -164,8 +186,10 @@ class _CreateAccountState extends State<CreateAccount> {
                                   birthDate: _selectedDate!,
                                 );
 
+                                //safety check
                                 if (!mounted) return;
 
+                                //results from auth
                                 if (result == 'Success') {
                                   final currentContext = context;
                                   Navigator.pop(currentContext);
@@ -190,6 +214,7 @@ class _CreateAccountState extends State<CreateAccount> {
                 
                 const SizedBox(height: 25),
                 
+                //link back to Login
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

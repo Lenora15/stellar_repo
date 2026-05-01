@@ -174,12 +174,13 @@ class _NotesPageState extends State<NotesPage>{
                 alignment: Alignment.centerRight,
                 child: DropdownButton<String>(
                   value: _sortBy,
-                  dropdownColor: Color.fromARGB(255, 32, 45, 57),
+                  dropdownColor: Colors.white,
+                  style: const TextStyle(color: Colors.black87, fontSize: 14),
                   underline: const SizedBox(),
                   items: <String>['Newest', 'Oldest'].map((String value) { //add sort by color
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text('Sort By: $value'),
+                      child: Text('Sort By: $value', style: const TextStyle(color: Colors.black87)),
                     );
                   }).toList(),
                   onChanged: (newValue){

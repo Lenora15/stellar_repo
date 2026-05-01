@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import '../services/database_service.dart';
 import '../models/event_model.dart';
 import '../models/reminder_model.dart';
-import 'time_picker.dart';
+import '../../../notification_service.dart';
 
 //had claude remove all class things, migrating class creation to a different location.
 class CreatorBox extends StatefulWidget {
@@ -42,6 +42,7 @@ class _CreatorBoxState extends State<CreatorBox> {
   TimeOfDay _startTime = const TimeOfDay(hour: 9, minute: 0);
   TimeOfDay _endTime = const TimeOfDay(hour: 10, minute: 0);
   List<int> _selectedReminderMinutes = [10];
+  String _reminderFrequency = 'none';
 
    @override
   void initState() {
@@ -66,6 +67,7 @@ class _CreatorBoxState extends State<CreatorBox> {
       _titleController.text = r.title;
       _startDate = r.dateTime;
       _startTime = TimeOfDay(hour: r.dateTime.hour, minute: r.dateTime.minute);
+      _reminderFrequency = r.recurrence?.frequency ?? 'none';
     }
   }
 
@@ -142,8 +144,32 @@ class _CreatorBoxState extends State<CreatorBox> {
         );
         if (widget.existingEvent != null) {
           await widget.dbService.updateEvent(newEvent);
+          final notifId = NotificationService.idFor(widget.existingEvent!.id);
+          await NotificationService.cancel(notifId);
+          if (_selectedReminderMinutes.isNotEmpty) {
+            final notifTime = start.subtract(Duration(minutes: _selectedReminderMinutes.first));
+            await NotificationService.schedule(
+              id: notifId,
+              title: title,
+              body: _selectedReminderMinutes.first == 0
+                  ? 'Starting now'
+                  : 'Starting in ${_selectedReminderMinutes.first}m',
+              at: notifTime,
+            );
+          }
         } else {
-          await widget.dbService.addEvent(newEvent);
+          final docRef = await widget.dbService.addEvent(newEvent);
+          if (_selectedReminderMinutes.isNotEmpty) {
+            final notifTime = start.subtract(Duration(minutes: _selectedReminderMinutes.first));
+            await NotificationService.schedule(
+              id: NotificationService.idFor(docRef.id),
+              title: title,
+              body: _selectedReminderMinutes.first == 0
+                  ? 'Starting now'
+                  : 'Starting in ${_selectedReminderMinutes.first}m',
+              at: notifTime,
+            );
+          }
         }
       } else {
         final newReminder = ReminderModel(
@@ -151,12 +177,28 @@ class _CreatorBoxState extends State<CreatorBox> {
           title: title,
           dateTime: start,
           isCompleted: widget.existingReminder?.isCompleted ?? false,
-          recurrence: widget.existingReminder?.recurrence,
+          recurrence: _reminderFrequency != 'none'
+              ? RecurrenceSettings(frequency: _reminderFrequency)
+              : null,
         );
         if (widget.existingReminder != null) {
+          final notifId = NotificationService.idFor(widget.existingReminder!.id);
+          await NotificationService.cancel(notifId);
           await widget.dbService.updateReminder(newReminder);
+          await NotificationService.schedule(
+            id: notifId,
+            title: title,
+            body: 'Your reminder is due',
+            at: start,
+          );
         } else {
-          await widget.dbService.addReminder(newReminder);
+          final docRef = await widget.dbService.addReminder(newReminder);
+          await NotificationService.schedule(
+            id: NotificationService.idFor(docRef.id),
+            title: title,
+            body: 'Your reminder is due',
+            at: start,
+          );
         }
       }
  
@@ -337,6 +379,47 @@ class _CreatorBoxState extends State<CreatorBox> {
 
                   if (_currentMode == 'Reminder') ...[
                     _buildDateTimeRow(true),
+                    const SizedBox(height: 24),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Repeat",
+                            style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          DropdownButtonFormField<String>(
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.repeat, color: Colors.grey),
+                              filled: true,
+                              fillColor: Colors.black.withValues(alpha: 0.05),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            dropdownColor: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            value: _reminderFrequency,
+                            items: const [
+                              DropdownMenuItem(value: 'none', child: Text('Never', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 'daily', child: Text('Daily', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 'weekly', child: Text('Weekly', style: TextStyle(color: Colors.black))),
+                              DropdownMenuItem(value: 'monthly', child: Text('Monthly', style: TextStyle(color: Colors.black))),
+                            ],
+                            onChanged: (val) {
+                              if (val != null) setState(() => _reminderFrequency = val);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ],
               ),
@@ -415,7 +498,7 @@ class _CreatorBoxState extends State<CreatorBox> {
         if (!_isAllDay)
           GestureDetector(
             onTap: () async {
-              final picked = await StellarTimePicker.show(context, initialTime: time);
+              final picked = await showTimePicker(context: context, initialTime: time);
               if (picked != null) {
                 setState(() {
                   if (isStart) _startTime = picked;

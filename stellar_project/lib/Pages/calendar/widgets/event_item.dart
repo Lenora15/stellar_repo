@@ -6,7 +6,7 @@ import '../models/class_model.dart';
 import '../models/reminder_model.dart';
 import '../services/database_service.dart';
 import 'creator_box.dart';
- 
+
 class EventItem extends StatelessWidget {
   final dynamic item;
   final DatabaseService dbService;
@@ -19,7 +19,10 @@ class EventItem extends StatelessWidget {
     required this.selectedDate,
   });
  
+ //opens editor when tapped
   void _openEditSheet(BuildContext context) {
+
+    //classes cant be created or edited from here
     if (item is ClassModel) return;
  
     showModalBottomSheet(
@@ -40,6 +43,8 @@ class EventItem extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.3), width: 1.5),
                 ),
               ),
+
+              //CreatorBox handles form for editing event/reminder
               child: CreatorBox(
                 dbService: dbService,
                 initialDate: selectedDate,

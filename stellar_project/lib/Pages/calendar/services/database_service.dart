@@ -55,10 +55,10 @@ class DatabaseService{
   }
 
   //add new reminder
-    Future<void> addReminder(ReminderModel reminder) async {
+  Future<DocumentReference> addReminder(ReminderModel reminder) async {
     Map<String, dynamic> reminderData = reminder.toMap();
     reminderData['userID'] = uid;
-    await _reminderRef.add(reminderData);
+    return await _reminderRef.add(reminderData);
   }
 
   //update existing reminder
@@ -153,10 +153,10 @@ Future<void> toggleSkipClass(ClassModel classModel, DateTime date) async {
   }
 
   //adds new event to user's private events collection in database
-  Future<void> addEvent(EventModel event) async {
+  Future<DocumentReference> addEvent(EventModel event) async {
     Map<String, dynamic> eventData = event.toMap();
     eventData['userID'] = uid;
-    await _eventRef.add(eventData);
+    return await _eventRef.add(eventData);
   }
 
     //update existing reminder
